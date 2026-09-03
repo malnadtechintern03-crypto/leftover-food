@@ -113,15 +113,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen>
     final lookupProduct = await BarcodeLookupService.instance.lookupProduct(cleanCode);
 
     final resolvedProduct = lookupProduct ??
-        BarcodeProduct(
-          barcode: cleanCode,
-          name: 'Scanned Product ($cleanCode)',
-          category: FoodCategory.other,
-          defaultQuantity: 1.0,
-          unit: FoodUnit.pieces,
-          storageLocation: StorageLocation.pantry,
-          defaultShelfLifeDays: 365,
-        );
+        BarcodeLookupService.createSmartFallbackProduct(cleanCode);
 
     if (!mounted) return;
 
@@ -308,7 +300,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen>
             children: [
               Icon(Icons.keyboard_alt_rounded, color: ColorPalette.freshEmerald),
               SizedBox(width: 8),
-              Text('Enter Barcode / SKU', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              Text('Enter Barcode Manually', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             ],
           ),
           content: Column(
@@ -324,6 +316,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen>
                 autofocus: true,
                 keyboardType: TextInputType.text,
                 decoration: InputDecoration(
+                  labelText: 'Barcode SKU',
                   hintText: 'e.g. 8901117002010 or Dolo 650',
                   prefixIcon: const Icon(Icons.qr_code_rounded, color: ColorPalette.freshEmerald),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
@@ -622,7 +615,7 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen>
                               elevation: 2,
                             ),
                             icon: const Icon(Icons.menu_book_rounded, size: 18),
-                            label: const Text('Catalog', style: TextStyle(fontWeight: FontWeight.w800)),
+                            label: const Text('Preset Catalog', style: TextStyle(fontWeight: FontWeight.w800)),
                             onPressed: _showCatalogSheet,
                           ),
                         ),

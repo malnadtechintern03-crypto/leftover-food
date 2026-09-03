@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🥗 FoodSave — Leftover Food & Expiry Manager
 
 > A production-grade, offline-first Flutter application designed to track leftover meals, monitor expiration dates, manage remaining portions, and prevent food waste.
@@ -73,3 +74,6 @@ flutter analyze
 - [Architecture Details](docs/architecture.md)
 - [Requirements Specification](docs/requirements.md)
 - [Architecture Decision Records (ADRs)](docs/decisions.md)
+=======
+# leftover-food
+>>>>>>> 4d64a21b848e1f4925db416b2bc0b837cb599008

@@ -725,12 +725,12 @@ class BarcodeLookupService {
       }
     }
 
-    // 3. Fallback: If not found in any database, create a smart BarcodeProduct with country / category inference
-    return _createSmartFallbackProduct(cleanBarcode);
+    // 3. Fallback: If not found in any database, return null
+    return null;
   }
 
   /// Creates a helpful smart fallback product when a barcode is not in public databases
-  static BarcodeProduct _createSmartFallbackProduct(String barcode) {
+  static BarcodeProduct createSmartFallbackProduct(String barcode) {
     FoodCategory category = FoodCategory.other;
     String suggestedPrefix = '';
 
