@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../app/theme/color_palette.dart';
 import '../../../food_inventory/presentation/providers/food_list_controller.dart';
+import '../../../../core/services/admin_sync_service.dart';
 
 class RecipeModel {
   final String id;
@@ -200,6 +201,26 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
   String _searchQuery = '';
   String _selectedCategory = 'All';
   final Set<String> _favouriteRecipeIds = {'rec-1', 'rec-3'};
+  List<RecipeModel> _recipes = _sampleRecipes;
+  bool _isSyncing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncRecipes();
+  }
+
+  Future<void> _syncRecipes() async {
+    if (!mounted) return;
+    setState(() => _isSyncing = true);
+    final fresh = await AdminSyncService.fetchRecipes(fallbackRecipes: _sampleRecipes);
+    if (mounted) {
+      setState(() {
+        _recipes = fresh;
+        _isSyncing = false;
+      });
+    }
+  }
 
   final _categories = const [
     'All',
@@ -356,7 +377,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
     );
 
     // Filter recipes by category, favorites, and search query
-    final filteredRecipes = _sampleRecipes.where((recipe) {
+    final filteredRecipes = _recipes.where((recipe) {
       if (_selectedCategory == 'Favourites') {
         if (!_favouriteRecipeIds.contains(recipe.id)) return false;
       } else if (_selectedCategory != 'All') {
@@ -384,8 +405,23 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
             letterSpacing: -0.4,
           ),
         ),
+        actions: [
+          IconButton(
+            tooltip: 'Sync with Admin Console',
+            icon: _isSyncing
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.sync_rounded),
+            onPressed: _syncRecipes,
+          ),
+        ],
       ),
-      body: CustomScrollView(
+      body: RefreshIndicator(
+        onRefresh: _syncRecipes,
+        child: CustomScrollView(
         physics: const BouncingScrollPhysics(),
         slivers: [
           // 1. Search Recipes Bar
@@ -643,6 +679,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
               ),
             ),
         ],
+      ),
       ),
     );
   }

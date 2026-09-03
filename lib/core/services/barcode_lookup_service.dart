@@ -590,7 +590,7 @@ class BarcodeLookupService {
   /// Looks up a product by its barcode from offline presets or multi-database online queries
   Future<BarcodeProduct?> lookupProduct(String barcode) async {
     final cleanBarcode = barcode.trim();
-    if (cleanBarcode.isEmpty) return null;
+    if (cleanBarcode.isEmpty || cleanBarcode.replaceAll('0', '').isEmpty) return null;
 
     // 1. Check local catalog first
     if (_offlineIndex.containsKey(cleanBarcode)) {
