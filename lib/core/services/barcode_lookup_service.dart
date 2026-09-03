@@ -51,6 +51,47 @@ class BarcodeProduct {
 
 /// Offline preset catalog of standard products across groceries, medicines, cosmetics, household, pet & electronics
 final List<BarcodeProduct> offlineBarcodeCatalog = [
+  // 🌾 Groceries, Grains & Staples (Common presets)
+  const BarcodeProduct(
+    barcode: '8906001020011',
+    name: 'Aashirvaad Superior MP Atta',
+    category: FoodCategory.flourAndBaking,
+    defaultQuantity: 5.0,
+    unit: FoodUnit.kg,
+    storageLocation: StorageLocation.pantry,
+    defaultPrice: 245.0,
+    minimumStock: 2.0,
+    defaultShelfLifeDays: 90,
+    brand: 'Aashirvaad',
+    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80',
+  ),
+  const BarcodeProduct(
+    barcode: '8901725181222',
+    name: 'Tata Salt Vacuum Evaporated',
+    category: FoodCategory.spices,
+    defaultQuantity: 1.0,
+    unit: FoodUnit.kg,
+    storageLocation: StorageLocation.kitchenCabinet,
+    defaultPrice: 28.0,
+    minimumStock: 1.0,
+    defaultShelfLifeDays: 730,
+    brand: 'Tata',
+    imageUrl: 'https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?auto=format&fit=crop&w=400&q=80',
+  ),
+  const BarcodeProduct(
+    barcode: '8901262010054',
+    name: 'Amul Pure Ghee Jar',
+    category: FoodCategory.oils,
+    defaultQuantity: 500.0,
+    unit: FoodUnit.grams,
+    storageLocation: StorageLocation.kitchenCabinet,
+    defaultPrice: 340.0,
+    minimumStock: 200.0,
+    defaultShelfLifeDays: 180,
+    brand: 'Amul',
+    imageUrl: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=400&q=80',
+  ),
+
   // 💊 Medicines & Pharmaceuticals
   const BarcodeProduct(
     barcode: '8901117002010',
@@ -298,45 +339,6 @@ final List<BarcodeProduct> offlineBarcodeCatalog = [
   ),
 
   // 🌾 Groceries, Grains & Pantry
-  const BarcodeProduct(
-    barcode: '8906001020011',
-    name: 'Aashirvaad Superior MP Atta',
-    category: FoodCategory.flourAndBaking,
-    defaultQuantity: 5.0,
-    unit: FoodUnit.kg,
-    storageLocation: StorageLocation.pantry,
-    defaultPrice: 245.0,
-    minimumStock: 2.0,
-    defaultShelfLifeDays: 90,
-    brand: 'Aashirvaad',
-    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?auto=format&fit=crop&w=400&q=80',
-  ),
-  const BarcodeProduct(
-    barcode: '8901725181222',
-    name: 'Tata Salt Vacuum Evaporated',
-    category: FoodCategory.spices,
-    defaultQuantity: 1.0,
-    unit: FoodUnit.kg,
-    storageLocation: StorageLocation.kitchenCabinet,
-    defaultPrice: 28.0,
-    minimumStock: 1.0,
-    defaultShelfLifeDays: 730,
-    brand: 'Tata',
-    imageUrl: 'https://images.unsplash.com/photo-1518110925495-5fe2fda0442c?auto=format&fit=crop&w=400&q=80',
-  ),
-  const BarcodeProduct(
-    barcode: '8901262010054',
-    name: 'Amul Pure Ghee Jar',
-    category: FoodCategory.oils,
-    defaultQuantity: 500.0,
-    unit: FoodUnit.grams,
-    storageLocation: StorageLocation.kitchenCabinet,
-    defaultPrice: 340.0,
-    minimumStock: 200.0,
-    defaultShelfLifeDays: 180,
-    brand: 'Amul',
-    imageUrl: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=400&q=80',
-  ),
   const BarcodeProduct(
     barcode: '8901030000000',
     name: 'Daawat Rozana Basmati Rice',
@@ -595,9 +597,10 @@ class BarcodeLookupService {
       return _offlineIndex[cleanBarcode];
     }
 
-    // Try finding by ending digits for SKU variations
+    // Try finding by standard 12-digit UPC to 13-digit EAN variations
     final localMatch = _offlineIndex.values.firstWhere(
-      (p) => cleanBarcode.endsWith(p.barcode) || p.barcode.endsWith(cleanBarcode),
+      (p) => (cleanBarcode.length == 12 && p.barcode == '0$cleanBarcode') ||
+             (p.barcode.length == 12 && cleanBarcode == '0${p.barcode}'),
       orElse: () => const BarcodeProduct(
         barcode: '',
         name: '',
