@@ -235,9 +235,18 @@ class FoodFormController extends StateNotifier<FoodFormState> {
     }
   }
 
+  void setImagePath(String? path) {
+    if (path == null || path.isEmpty) {
+      state = state.copyWith(clearImage: true, clearError: true);
+    } else {
+      state = state.copyWith(imagePath: path, clearError: true);
+    }
+  }
+
   void removeImage() {
     state = state.copyWith(clearImage: true);
   }
+
 
   Future<bool> submit() async {
     if (state.name.trim().isEmpty) {

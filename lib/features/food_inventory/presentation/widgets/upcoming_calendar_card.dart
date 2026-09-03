@@ -74,6 +74,8 @@ class UpcomingCalendarCard extends StatelessWidget {
                     children: [
                       Text(
                         'Upcoming Expiries',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           fontSize: 15,
@@ -81,6 +83,8 @@ class UpcomingCalendarCard extends StatelessWidget {
                       ),
                       Text(
                         'Tracked on Expiry Calendar',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 11.5,
                           color: isDark

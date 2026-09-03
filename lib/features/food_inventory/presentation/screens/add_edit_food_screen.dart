@@ -108,20 +108,28 @@ class _AddEditFoodScreenState extends ConsumerState<AddEditFoodScreen> {
         notifier.setMinimumStock(product.minimumStock);
       }
       notifier.setBarcode(product.barcode);
-      notifier.setExpiryDate(
-        DateTime.now().add(Duration(days: product.defaultShelfLifeDays)),
-      );
+      notifier.setExpiryDate(product.estimatedExpiryDate);
+      notifier.setImagePath(product.effectiveImageUrl);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(
-              product.name.isNotEmpty
-                  ? 'Recognized ${product.name}! Barcode: ${product.barcode}'
-                  : 'Barcode ${product.barcode} scanned! Please enter product details.',
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    product.name.isNotEmpty
+                        ? 'Captured ${product.name} with photo & expiry date!'
+                        : 'Captured barcode ${product.barcode}!',
+                  ),
+                ),
+              ],
             ),
             backgroundColor: ColorPalette.freshEmeraldDark,
             behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
       }
@@ -903,94 +911,109 @@ class _AddEditFoodScreenState extends ConsumerState<AddEditFoodScreen> {
     FoodFormController notifier,
     bool isDark,
   ) {
-    if (formState.imagePath != null && !kIsWeb) {
-      final file = File(formState.imagePath!);
-      if (file.existsSync()) {
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: ColorPalette.freshEmerald.withValues(alpha: 0.4),
-              width: 1.4,
-            ),
+    final imagePath = formState.imagePath?.trim();
+    final isUrl = imagePath != null && (imagePath.startsWith('http://') || imagePath.startsWith('https://'));
+    final isLocalFile = imagePath != null && !isUrl && !kIsWeb && File(imagePath).existsSync();
+
+    if (isUrl || isLocalFile) {
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: ColorPalette.freshEmerald.withValues(alpha: 0.4),
+            width: 1.4,
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            children: [
-              GestureDetector(
-                onTap: () => FullScreenImageViewer.show(
-                  context,
-                  imagePath: formState.imagePath!,
-                  title: formState.name.isNotEmpty ? formState.name : 'Grocery Photo Preview',
-                ),
-                child: Image.file(
-                  file,
-                  height: 190,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            GestureDetector(
+              onTap: () => FullScreenImageViewer.show(
+                context,
+                imagePath: imagePath,
+                title: formState.name.isNotEmpty ? formState.name : 'Grocery Photo Preview',
               ),
-              Positioned(
-                bottom: 10,
-                left: 10,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.65),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.white24),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.zoom_in_rounded, size: 13, color: Colors.white),
-                      SizedBox(width: 4),
-                      Text(
-                        'Tap to Zoom',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
+              child: isUrl
+                  ? Image.network(
+                      imagePath,
+                      height: 190,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        height: 190,
+                        width: double.infinity,
+                        color: formState.category.color.withValues(alpha: 0.15),
+                        child: Icon(formState.category.icon, color: formState.category.color, size: 48),
                       ),
-                    ],
-                  ),
+                    )
+                  : Image.file(
+                      File(imagePath),
+                      height: 190,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+
+            ),
+            Positioned(
+              bottom: 10,
+              left: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: Colors.white24),
                 ),
-              ),
-              Positioned(
-                top: 10,
-                right: 10,
-                child: Row(
+                child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircleAvatar(
-                      backgroundColor: Colors.black54,
-                      radius: 18,
-                      child: IconButton(
-                        icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 16),
-                        onPressed: () => _showImageSourceDialog(context),
-                        tooltip: 'Change photo',
-                        padding: EdgeInsets.zero,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    CircleAvatar(
-                      backgroundColor: Colors.black54,
-                      radius: 18,
-                      child: IconButton(
-                        icon: const Icon(Icons.delete_outline_rounded, color: ColorPalette.sunsetCoral, size: 16),
-                        onPressed: notifier.removeImage,
-                        tooltip: 'Remove photo',
-                        padding: EdgeInsets.zero,
+                    Icon(Icons.zoom_in_rounded, size: 13, color: Colors.white),
+                    SizedBox(width: 4),
+                    Text(
+                      'Tap to Zoom',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
                       ),
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        );
-      }
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  CircleAvatar(
+                    backgroundColor: Colors.black54,
+                    radius: 18,
+                    child: IconButton(
+                      icon: const Icon(Icons.edit_rounded, color: Colors.white, size: 16),
+                      onPressed: () => _showImageSourceDialog(context),
+                      tooltip: 'Change photo',
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  CircleAvatar(
+                    backgroundColor: Colors.black54,
+                    radius: 18,
+                    child: IconButton(
+                      icon: const Icon(Icons.delete_outline_rounded, color: ColorPalette.sunsetCoral, size: 16),
+                      onPressed: notifier.removeImage,
+                      tooltip: 'Remove photo',
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
     return Material(

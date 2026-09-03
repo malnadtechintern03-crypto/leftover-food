@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../app/theme/color_palette.dart';
+import '../../../../core/utils/food_image_helper.dart';
 import '../../domain/entities/food_category.dart';
 import '../../domain/entities/food_unit.dart';
 import '../../domain/entities/storage_location.dart';
@@ -34,6 +35,7 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
   StorageLocation _storageLocation = StorageLocation.fridge;
   DateTime _expiryDate = DateTime.now().add(const Duration(days: 3));
   String? _barcode;
+  String? _imagePath;
 
   final List<Map<String, dynamic>> _quickPresets = [
     {
@@ -102,7 +104,8 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
 
   void _applyPreset(Map<String, dynamic> preset) {
     setState(() {
-      _nameController.text = preset['name'] as String;
+      final name = preset['name'] as String;
+      _nameController.text = name;
       _category = preset['category'] as FoodCategory;
       _unit = preset['unit'] as FoodUnit;
       _quantityController.text = preset['qty'] as String;
@@ -110,6 +113,7 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
       _priceController.text = preset['price'] as String;
       final days = preset['days'] as int;
       _expiryDate = DateTime.now().add(Duration(days: days));
+      _imagePath = FoodImageHelper.getEffectiveImageUrl(name, _category);
     });
   }
 
@@ -130,7 +134,8 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
           _priceController.text = product.defaultPrice!.toStringAsFixed(0);
         }
         _barcode = product.barcode;
-        _expiryDate = DateTime.now().add(Duration(days: product.defaultShelfLifeDays));
+        _expiryDate = product.estimatedExpiryDate;
+        _imagePath = product.effectiveImageUrl;
       });
     }
   }
@@ -156,6 +161,7 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
           location: _storageLocation,
           price: price,
           barcode: _barcode,
+          imagePath: _imagePath ?? FoodImageHelper.getEffectiveImageUrl(name, _category),
         );
 
     if (mounted) {
@@ -170,6 +176,7 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
       );
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

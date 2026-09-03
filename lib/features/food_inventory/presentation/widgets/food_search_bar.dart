@@ -9,6 +9,7 @@ class FoodSearchBar extends StatefulWidget {
   final FoodSortOption currentSort;
   final ValueChanged<String> onQueryChanged;
   final ValueChanged<FoodSortOption>? onSortChanged;
+  final VoidCallback? onScanPressed;
   final bool showSortButton;
   final String hintText;
 
@@ -18,6 +19,7 @@ class FoodSearchBar extends StatefulWidget {
     required this.currentSort,
     required this.onQueryChanged,
     this.onSortChanged,
+    this.onScanPressed,
     this.showSortButton = true,
     this.hintText = 'Search groceries, items, or barcodes...',
   });
@@ -184,7 +186,14 @@ class _FoodSearchBarState extends State<FoodSearchBar> {
                             setState(() {});
                           },
                         )
-                      : null,
+                      : (widget.onScanPressed != null
+                          ? IconButton(
+                              icon: const Icon(Icons.qr_code_scanner_rounded, size: 20),
+                              color: ColorPalette.freshEmerald,
+                              tooltip: 'Scan Barcode',
+                              onPressed: widget.onScanPressed,
+                            )
+                          : null),
                   filled: false,
                   border: InputBorder.none,
                   enabledBorder: InputBorder.none,

@@ -92,6 +92,8 @@ class PantryScreen extends ConsumerWidget {
                   child: FoodSearchBar(
                     initialQuery: listState.filter.searchQuery,
                     currentSort: listState.filter.sortOption,
+                    hintText: 'Search products, medicines, barcodes...',
+                    onScanPressed: () => context.push(RoutePaths.barcodeScanner),
                     onQueryChanged: (query) {
                       ref
                           .read(foodListControllerProvider.notifier)

@@ -40,6 +40,7 @@ class FullScreenImageViewer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isUrl = imagePath.startsWith('http://') || imagePath.startsWith('https://');
     final file = File(imagePath);
 
     return Scaffold(
@@ -49,13 +50,13 @@ class FullScreenImageViewer extends StatelessWidget {
           children: [
             // Interactive Zoomable Image Area
             Center(
-              child: file.existsSync()
+              child: isUrl
                   ? InteractiveViewer(
                       panEnabled: true,
                       minScale: 0.8,
                       maxScale: 4.0,
-                      child: Image.file(
-                        file,
+                      child: Image.network(
+                        imagePath,
                         fit: BoxFit.contain,
                         errorBuilder: (context, error, stackTrace) => const Center(
                           child: Icon(
@@ -66,13 +67,31 @@ class FullScreenImageViewer extends StatelessWidget {
                         ),
                       ),
                     )
-                  : const Center(
-                      child: Text(
-                        'Image file not found on device.',
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ),
+                  : file.existsSync()
+                      ? InteractiveViewer(
+                          panEnabled: true,
+                          minScale: 0.8,
+                          maxScale: 4.0,
+                          child: Image.file(
+                            file,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) => const Center(
+                              child: Icon(
+                                Icons.broken_image_rounded,
+                                size: 64,
+                                color: Colors.white54,
+                              ),
+                            ),
+                          ),
+                        )
+                      : const Center(
+                          child: Text(
+                            'Image file not found on device.',
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ),
             ),
+
 
             // Top Bar with Dismiss and Title
             Positioned(

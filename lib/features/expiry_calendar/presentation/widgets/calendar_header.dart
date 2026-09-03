@@ -52,15 +52,21 @@ class CalendarHeader extends StatelessWidget {
             children: [
               // Month / Period Title
               Expanded(
-                child: Text(
-                  _formatTitle(),
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 20,
-                    letterSpacing: -0.4,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    _formatTitle(),
+                    maxLines: 1,
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 18,
+                      letterSpacing: -0.4,
+                    ),
                   ),
                 ),
               ),
+              const SizedBox(width: 6),
 
               // "Today" Button
               Material(
@@ -69,7 +75,7 @@ class CalendarHeader extends StatelessWidget {
                   onTap: onToday,
                   borderRadius: BorderRadius.circular(20),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                     decoration: BoxDecoration(
                       color: isDark
                           ? ColorPalette.freshEmerald.withValues(alpha: 0.15)
@@ -85,14 +91,14 @@ class CalendarHeader extends StatelessWidget {
                       children: [
                         const Icon(
                           Icons.today_rounded,
-                          size: 15,
+                          size: 13,
                           color: ColorPalette.freshEmerald,
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 3),
                         Text(
                           'Today',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 11.5,
                             fontWeight: FontWeight.w700,
                             color: isDark
                                 ? ColorPalette.freshEmerald
@@ -105,13 +111,13 @@ class CalendarHeader extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: 8),
+              const SizedBox(width: 6),
 
               // Navigation Arrow Controls (< and >)
               Container(
                 decoration: BoxDecoration(
                   color: isDark ? ColorPalette.darkCard : ColorPalette.lightCard,
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isDark ? ColorPalette.darkBorder : ColorPalette.lightBorder,
                   ),
@@ -120,21 +126,21 @@ class CalendarHeader extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.chevron_left_rounded, size: 22),
+                      icon: const Icon(Icons.chevron_left_rounded, size: 20),
                       tooltip: 'Previous period',
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(),
                       onPressed: onPrevious,
                     ),
                     Container(
                       width: 1,
-                      height: 20,
+                      height: 18,
                       color: isDark ? ColorPalette.darkBorder : ColorPalette.lightBorder,
                     ),
                     IconButton(
-                      icon: const Icon(Icons.chevron_right_rounded, size: 22),
+                      icon: const Icon(Icons.chevron_right_rounded, size: 20),
                       tooltip: 'Next period',
-                      padding: const EdgeInsets.all(6),
+                      padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(),
                       onPressed: onNext,
                     ),
@@ -185,6 +191,8 @@ class CalendarHeader extends StatelessWidget {
                         child: Center(
                           child: Text(
                             mode.displayName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,

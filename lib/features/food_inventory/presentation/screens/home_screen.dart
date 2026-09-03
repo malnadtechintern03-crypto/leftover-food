@@ -115,10 +115,34 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 10),
 
-                      // Right Actions: Quick Add Pill & Notification Bell with Badge
+                      // Right Actions: Scan Barcode, Quick Add Pill & Notification Bell with Badge
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          // Scan Barcode Button
+                          Container(
+                            decoration: BoxDecoration(
+                              color: isDark ? ColorPalette.darkCard : ColorPalette.lightCard,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isDark
+                                    ? ColorPalette.darkBorder
+                                    : ColorPalette.lightBorder,
+                                width: 1.0,
+                              ),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(
+                                Icons.qr_code_scanner_rounded,
+                                size: 20,
+                                color: ColorPalette.freshEmerald,
+                              ),
+                              tooltip: 'Scan Any Product Barcode',
+                              onPressed: () => context.push(RoutePaths.barcodeScanner),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+
                           // Quick Add (Flash) Button
                           Material(
                             color: Colors.transparent,
@@ -240,7 +264,8 @@ class HomeScreen extends ConsumerWidget {
                     initialQuery: listState.filter.searchQuery,
                     currentSort: listState.filter.sortOption,
                     showSortButton: false,
-                    hintText: 'Search groceries, pantry items, spices...',
+                    hintText: 'Search products, medicines, barcodes...',
+                    onScanPressed: () => context.push(RoutePaths.barcodeScanner),
                     onQueryChanged: (query) {
                       ref
                           .read(foodListControllerProvider.notifier)

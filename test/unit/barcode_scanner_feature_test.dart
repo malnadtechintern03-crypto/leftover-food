@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foodsave/core/database/database_helper.dart';
 import 'package:foodsave/core/services/barcode_lookup_service.dart';
+import 'package:foodsave/core/utils/expiry_date_extractor.dart';
 import 'package:foodsave/features/food_inventory/data/datasources/food_local_datasource.dart';
 import 'package:foodsave/features/food_inventory/data/models/food_item_model.dart';
 import 'package:foodsave/features/food_inventory/data/repositories/food_repository_impl.dart';
@@ -26,29 +27,112 @@ void main() {
       getFoodItemByBarcodeUseCase = GetFoodItemByBarcodeUseCase(repository);
     });
 
-    test('BarcodeLookupService correctly resolves offline presets', () async {
+    test('BarcodeLookupService correctly resolves offline presets with image and expiry for any product', () async {
       final lookupService = BarcodeLookupService.instance;
 
+      // 1. Grocery item
       final atta = await lookupService.lookupProduct('8906001020011');
       expect(atta, isNotNull);
       expect(atta!.name, 'Aashirvaad Superior MP Atta');
       expect(atta.category, FoodCategory.flourAndBaking);
       expect(atta.unit, FoodUnit.kg);
+      expect(atta.effectiveImageUrl, isNotEmpty);
+      expect(atta.estimatedExpiryDate.isAfter(DateTime.now()), isTrue);
 
-      final salt = await lookupService.lookupProduct('8901725181222');
-      expect(salt, isNotNull);
-      expect(salt!.name, 'Tata Salt Vacuum Evaporated');
-      expect(salt.category, FoodCategory.spices);
+      // 2. Medicine item (Dolo 650)
+      final dolo = await lookupService.lookupProduct('8901117002010');
+      expect(dolo, isNotNull);
+      expect(dolo!.name, contains('Dolo 650'));
+      expect(dolo.category, FoodCategory.medicines);
+      expect(dolo.defaultShelfLifeDays, 730);
+      expect(dolo.effectiveImageUrl, isNotEmpty);
 
-      final ghee = await lookupService.lookupProduct('8901262010054');
-      expect(ghee, isNotNull);
-      expect(ghee!.name, 'Amul Pure Ghee Jar');
-      expect(ghee.category, FoodCategory.oils);
+      // 3. Personal Care (Dove Shampoo)
+      final dove = await lookupService.lookupProduct('8901030612345');
+      expect(dove, isNotNull);
+      expect(dove!.name, contains('Dove'));
+      expect(dove.category, FoodCategory.personalCare);
+      expect(dove.defaultShelfLifeDays, 730);
+
+      // 4. Household Cleaning (Surf Excel)
+      final surf = await lookupService.lookupProduct('8901030700001');
+      expect(surf, isNotNull);
+      expect(surf!.name, contains('Surf Excel'));
+      expect(surf.category, FoodCategory.householdCleaning);
+
+      // 5. Electronics & Batteries (Duracell)
+      final duracell = await lookupService.lookupProduct('5000394017771');
+      expect(duracell, isNotNull);
+      expect(duracell!.name, contains('Duracell'));
+      expect(duracell.category, FoodCategory.electronicsAndHardware);
+      expect(duracell.defaultShelfLifeDays, 1825);
+
+      // 6. Pet Supplies (Pedigree)
+      final pedigree = await lookupService.lookupProduct('8906002480111');
+      expect(pedigree, isNotNull);
+      expect(pedigree!.name, contains('Pedigree'));
+      expect(pedigree.category, FoodCategory.petSupplies);
 
       final unknown = await lookupService.lookupProduct('0000000000000');
       // When offline or uncatalogued, unknown barcode returns null for manual entry
       expect(unknown, isNull);
     });
+
+    test('ExpiryDateExtractor correctly estimates shelf life and parses date text for any product', () {
+      // Grocery
+      final milkExpiry = ExpiryDateExtractor.estimateExpiryDate(
+        category: FoodCategory.dairy,
+        foodName: 'Fresh Whole Milk',
+      );
+      expect(milkExpiry.difference(DateTime.now()).inDays, inInclusiveRange(6, 8));
+
+      // Medicine (2 years)
+      final paracetamolExpiry = ExpiryDateExtractor.estimateExpiryDate(
+        category: FoodCategory.medicines,
+        foodName: 'Paracetamol 650mg Tablets',
+      );
+      expect(paracetamolExpiry.difference(DateTime.now()).inDays, inInclusiveRange(720, 735));
+
+      // Cosmetics (1 year for sunscreen)
+      final sunscreenExpiry = ExpiryDateExtractor.estimateExpiryDate(
+        category: FoodCategory.personalCare,
+        foodName: 'UV Sunscreen Lotion SPF 50',
+      );
+      expect(sunscreenExpiry.difference(DateTime.now()).inDays, inInclusiveRange(360, 370));
+
+      // Batteries (5 years)
+      final batteryExpiry = ExpiryDateExtractor.estimateExpiryDate(
+        category: FoodCategory.electronicsAndHardware,
+        foodName: 'Duracell AA Alkaline Batteries',
+      );
+      expect(batteryExpiry.difference(DateTime.now()).inDays, inInclusiveRange(1820, 1830));
+
+      // Parsing formatted date strings across varied product packaging
+      final d1 = ExpiryDateExtractor.parseExpiryDateText('EXP: 15/12/2026');
+      expect(d1, isNotNull);
+      expect(d1!.day, 15);
+      expect(d1.month, 12);
+      expect(d1.year, 2026);
+
+      final d2 = ExpiryDateExtractor.parseExpiryDateText('Best Before 2027-08-20');
+      expect(d2, isNotNull);
+      expect(d2!.day, 20);
+      expect(d2.month, 8);
+      expect(d2.year, 2027);
+
+      final d3 = ExpiryDateExtractor.parseExpiryDateText('10/26');
+      expect(d3, isNotNull);
+      expect(d3!.month, 10);
+      expect(d3.year, 2026);
+
+      final d4 = ExpiryDateExtractor.parseExpiryDateText('Batch No: 9942 Exp Date: 2029/03/15');
+      expect(d4, isNotNull);
+      expect(d4!.year, 2029);
+      expect(d4.month, 3);
+      expect(d4.day, 15);
+    });
+
+
 
     test('GetFoodItemByBarcodeUseCase finds active pantry grocery by barcode', () async {
       final item = FoodItem(

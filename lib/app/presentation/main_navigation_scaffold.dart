@@ -88,45 +88,55 @@ class _MainNavigationScaffoldState extends State<MainNavigationScaffold> {
           child: SizedBox(
             height: 60,
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                _buildNavItem(
-                  index: 0,
-                  icon: Icons.home_rounded,
-                  label: 'Home',
-                  isSelected: _currentIndex == 0,
-                  isDark: isDark,
+                Expanded(
+                  child: _buildNavItem(
+                    index: 0,
+                    icon: Icons.home_rounded,
+                    label: 'Home',
+                    isSelected: _currentIndex == 0,
+                    isDark: isDark,
+                  ),
                 ),
-                _buildNavItem(
-                  index: 1,
-                  icon: Icons.shopping_basket_outlined,
-                  label: 'Groceries',
-                  isSelected: _currentIndex == 1,
-                  isDark: isDark,
+                Expanded(
+                  child: _buildNavItem(
+                    index: 1,
+                    icon: Icons.shopping_basket_outlined,
+                    label: 'Groceries',
+                    isSelected: _currentIndex == 1,
+                    isDark: isDark,
+                  ),
                 ),
-                _buildNavItem(
-                  index: 2,
-                  icon: Icons.calendar_month_rounded,
-                  label: 'Calendar',
-                  isSelected: _currentIndex == 2,
-                  isDark: isDark,
+                Expanded(
+                  child: _buildNavItem(
+                    index: 2,
+                    icon: Icons.calendar_month_rounded,
+                    label: 'Calendar',
+                    isSelected: _currentIndex == 2,
+                    isDark: isDark,
+                  ),
                 ),
-                _buildNavItem(
-                  index: 3,
-                  icon: Icons.restaurant_menu_rounded,
-                  label: 'Recipes',
-                  isSelected: _currentIndex == 3,
-                  isDark: isDark,
+                Expanded(
+                  child: _buildNavItem(
+                    index: 3,
+                    icon: Icons.restaurant_menu_rounded,
+                    label: 'Recipes',
+                    isSelected: _currentIndex == 3,
+                    isDark: isDark,
+                  ),
                 ),
-                _buildNavItem(
-                  index: 4,
-                  icon: Icons.person_outline_rounded,
-                  label: 'Profile',
-                  isSelected: _currentIndex == 4,
-                  isDark: isDark,
+                Expanded(
+                  child: _buildNavItem(
+                    index: 4,
+                    icon: Icons.person_outline_rounded,
+                    label: 'Profile',
+                    isSelected: _currentIndex == 4,
+                    isDark: isDark,
+                  ),
                 ),
               ],
             ),
+
           ),
         ),
       ),
