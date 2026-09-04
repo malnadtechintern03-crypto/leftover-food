@@ -28,9 +28,14 @@ class DatabaseHelper {
     }
   }
 
+  static Future<Database?>? _openDbFuture;
+
   Future<Database?> get database async {
     if (_database != null) return _database;
-    _database = await _initDB(AppConstants.databaseName);
+    if (_openDbFuture != null) return _openDbFuture!;
+    _openDbFuture = _initDB(AppConstants.databaseName);
+    _database = await _openDbFuture;
+    _openDbFuture = null;
     return _database;
   }
 
@@ -236,7 +241,10 @@ class DatabaseHelper {
   }
 
   Future<void> _onOpenDB(Database db) async {
-    await _purgeNonGroceryItems(db);
+    try {
+      await db.execute('PRAGMA journal_mode = WAL;');
+      await db.execute('PRAGMA synchronous = NORMAL;');
+    } catch (_) {}
   }
 
   Future<void> _purgeNonGroceryItems(Database db) async {

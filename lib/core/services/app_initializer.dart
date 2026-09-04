@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,15 +40,24 @@ class AppInitializer {
     _sharedPreferences = prefs;
   }
 
+  Future<void>? _initFuture;
+
   /// Initializes services concurrently in the background
   Future<void> initialize() async {
     if (_isInitialized) return;
+    if (_initFuture != null) return _initFuture!;
+    _initFuture = _performInitialize();
+    return _initFuture!;
+  }
 
+  Future<void> _performInitialize() async {
     ensureEarlyBindings();
 
-    // Run startup operations concurrently
+    // Start local push notifications in background without holding up the startup pipeline
+    unawaited(_initNotifications());
+
+    // Run core startup operations concurrently
     await Future.wait([
-      _initNotifications(),
       _initSharedPreferences(),
       _initDatabaseAndSeed(),
     ]);

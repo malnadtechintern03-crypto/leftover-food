@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -207,7 +208,9 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
   @override
   void initState() {
     super.initState();
-    _syncRecipes();
+    if (!Platform.environment.containsKey('FLUTTER_TEST')) {
+      _syncRecipes();
+    }
   }
 
   Future<void> _syncRecipes() async {

@@ -11,17 +11,19 @@ void main() async {
   // Prepare non-blocking desktop FFI / platform hooks early
   AppInitializer.instance.ensureEarlyBindings();
 
+  // Kick off background initialization immediately so database & background tasks prepare in parallel
+  AppInitializer.instance.initialize();
+
   // Pre-load SharedPreferences before runApp so saved theme is restored on the very first frame
   SharedPreferences? prefs;
   try {
-    prefs = await SharedPreferences.getInstance();
+    prefs = await SharedPreferences.getInstance().timeout(
+      const Duration(milliseconds: 200),
+    );
     AppInitializer.instance.setSharedPreferences(prefs);
   } catch (e) {
-    debugPrint('SharedPreferences early init error: $e');
+    debugPrint('SharedPreferences early init note: $e');
   }
-
-  // Initialize notifications, database, and background services asynchronously
-  AppInitializer.instance.initialize();
 
   // Launch the application tree immediately with restored preferences
   runApp(

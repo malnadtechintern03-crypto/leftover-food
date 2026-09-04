@@ -36,6 +36,7 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
   DateTime _expiryDate = DateTime.now().add(const Duration(days: 3));
   String? _barcode;
   String? _imagePath;
+  String? _notes;
 
   final List<Map<String, dynamic>> _quickPresets = [
     {
@@ -136,6 +137,7 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
         _barcode = product.barcode;
         _expiryDate = product.estimatedExpiryDate;
         _imagePath = product.effectiveImageUrl;
+        _notes = product.description ?? product.brand;
       });
     }
   }
@@ -162,6 +164,7 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
           price: price,
           barcode: _barcode,
           imagePath: _imagePath ?? FoodImageHelper.getEffectiveImageUrl(name, _category),
+          notes: _notes,
         );
 
     if (mounted) {
@@ -276,18 +279,43 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
                 ),
                 child: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: ColorPalette.freshEmerald.withValues(alpha: 0.2),
-                        shape: BoxShape.circle,
+                    if (_imagePath != null && _imagePath!.isNotEmpty) ...[
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: (_imagePath!.startsWith('http://') || _imagePath!.startsWith('https://'))
+                              ? Image.network(
+                                  _imagePath!,
+                                  width: 36,
+                                  height: 36,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => Container(
+                                    color: _category.color.withValues(alpha: 0.2),
+                                    child: Icon(_category.icon, size: 20, color: _category.color),
+                                  ),
+                                )
+                              : Container(
+                                  color: _category.color.withValues(alpha: 0.2),
+                                  child: Icon(_category.icon, size: 20, color: _category.color),
+                                ),
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.qr_code_scanner_rounded,
-                        color: ColorPalette.freshEmerald,
-                        size: 18,
+                    ] else ...[
+                      Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: ColorPalette.freshEmerald.withValues(alpha: 0.2),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.qr_code_scanner_rounded,
+                          color: ColorPalette.freshEmerald,
+                          size: 18,
+                        ),
                       ),
-                    ),
+                    ],
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -295,8 +323,8 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
                         children: [
                           Text(
                             _barcode != null && _barcode!.isNotEmpty
-                                ? 'Scanned: $_barcode (Tap to Rescan)'
-                                : 'Scan Grocery Barcode',
+                                ? 'Scanned: $_barcode'
+                                : 'Scan Any Product Barcode',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
@@ -304,7 +332,9 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
                             ),
                           ),
                           Text(
-                            'Point camera at packaging to auto-fill details',
+                            _barcode != null && _barcode!.isNotEmpty
+                                ? 'Tap to rescan another barcode'
+                                : 'Point camera at product to auto-fill details',
                             style: TextStyle(
                               fontSize: 11,
                               color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,

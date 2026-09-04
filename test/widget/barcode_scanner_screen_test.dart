@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:foodsave/app/theme/app_theme.dart';
+import 'package:foodsave/features/food_inventory/domain/entities/food_category.dart';
 import 'package:foodsave/features/food_inventory/domain/entities/food_filter.dart';
 import 'package:foodsave/features/food_inventory/domain/entities/food_item.dart';
 import 'package:foodsave/features/food_inventory/domain/entities/food_stats.dart';
+import 'package:foodsave/features/food_inventory/domain/entities/storage_location.dart';
 import 'package:foodsave/features/food_inventory/domain/repositories/food_repository.dart';
 import 'package:foodsave/features/food_inventory/presentation/providers/food_inventory_providers.dart';
 import 'package:foodsave/features/food_inventory/presentation/screens/add_edit_food_screen.dart';
@@ -140,5 +142,63 @@ void main() {
     expect(find.text('📷 Scan Barcode'), findsOneWidget);
     expect(find.text('Grocery Item Name *'), findsOneWidget);
     expect(find.text('Grocery Category *'), findsOneWidget);
+  });
+
+  testWidgets('Looking up non-grocery product barcode displays details, storage location chips, and passes notes on add',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() => tester.view.resetPhysicalSize());
+
+    final mockRepo = MockTestBarcodeFoodRepository();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          foodRepositoryProvider.overrideWithValue(mockRepo),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: const BarcodeScannerScreen(),
+        ),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Tap "Enter Code"
+    await tester.tap(find.text('Enter Code').first);
+    await tester.pump(const Duration(milliseconds: 200));
+
+    // Enter book barcode (Clean Code)
+    await tester.enterText(find.byType(TextField), '9780132350884');
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Tap Look Up
+    await tester.tap(find.text('Look Up'));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Verify Modal Bottom Sheet renders with captured elements
+    expect(find.text('Product Captured! ✨'), findsOneWidget);
+    expect(find.textContaining('Clean Code'), findsWidgets);
+    expect(find.text('Product Details & Info'), findsOneWidget);
+    expect(find.textContaining('craftsmanship'), findsOneWidget);
+    expect(find.text('Product Category'), findsOneWidget);
+    expect(find.text('Storage Location'), findsOneWidget);
+    expect(find.text('Add to Inventory'), findsOneWidget);
+
+    // Tap "Add to Inventory"
+    await tester.tap(find.text('Add to Inventory'));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Verify the item was added to repository with all details and notes
+    expect(mockRepo.items.length, 1);
+    expect(mockRepo.items.first.name, contains('Clean Code'));
+    expect(mockRepo.items.first.notes, contains('craftsmanship'));
+    expect(mockRepo.items.first.category, FoodCategory.stationeryAndOffice);
+    expect(mockRepo.items.first.storageLocation, StorageLocation.kitchenCabinet);
   });
 }

@@ -111,6 +111,15 @@ class _AddEditFoodScreenState extends ConsumerState<AddEditFoodScreen> {
       notifier.setExpiryDate(product.estimatedExpiryDate);
       notifier.setImagePath(product.effectiveImageUrl);
 
+      final effectiveNotes = product.description ??
+          (product.brand != null && product.brand!.isNotEmpty
+              ? 'Brand: ${product.brand}'
+              : null);
+      if (effectiveNotes != null && effectiveNotes.isNotEmpty) {
+        _notesController.text = effectiveNotes;
+        notifier.setNotes(effectiveNotes);
+      }
+
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

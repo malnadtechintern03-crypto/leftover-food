@@ -536,98 +536,128 @@ class FoodDetailScreen extends ConsumerWidget {
 
   Widget _buildHeaderBanner(
       BuildContext context, FoodItem item, bool isDark) {
-    if (item.imagePath != null && !kIsWeb) {
-      final file = File(item.imagePath!);
-      if (file.existsSync()) {
-        final formattedQty =
-            '${item.remainingQuantity.toStringAsFixed(item.remainingQuantity.truncateToDouble() == item.remainingQuantity ? 0 : 1)} ${item.unit.abbreviation} • ${item.category.label}';
+    final imagePath = item.imagePath?.trim();
+    final isUrl = imagePath != null &&
+        (imagePath.startsWith('http://') || imagePath.startsWith('https://'));
+    final isLocalFile = imagePath != null &&
+        !isUrl &&
+        !kIsWeb &&
+        File(imagePath).existsSync();
 
-        return GestureDetector(
-          onTap: () => FullScreenImageViewer.show(
-            context,
-            imagePath: item.imagePath!,
-            title: item.name,
-            subtitle: formattedQty,
-          ),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              Image.file(file, fit: BoxFit.cover),
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.4),
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.7),
-                    ],
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 14,
-                right: 14,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.65),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.3),
-                      width: 1,
-                    ),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.zoom_in_rounded, size: 14, color: Colors.white),
-                      SizedBox(width: 4),
-                      Text(
-                        'Tap to Zoom',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      }
+    final formattedQty =
+        '${item.remainingQuantity.toStringAsFixed(item.remainingQuantity.truncateToDouble() == item.remainingQuantity ? 0 : 1)} ${item.unit.abbreviation} • ${item.category.label}';
+
+    final effectiveZoomPath = isUrl
+        ? imagePath
+        : isLocalFile
+            ? imagePath
+            : FoodImageHelper.getEffectiveImageUrl(item.name, item.category);
+
+    Widget imageWidget;
+    if (isLocalFile) {
+      imageWidget = Image.file(
+        File(imagePath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          final fallbackUrl =
+              FoodImageHelper.getEffectiveImageUrl(item.name, item.category);
+          return Image.network(
+            fallbackUrl,
+            fit: BoxFit.cover,
+            cacheWidth: 800,
+            cacheHeight: 450,
+            errorBuilder: (_, _, _) => _buildCategoryBannerFallback(item),
+          );
+        },
+      );
+    } else if (isUrl) {
+      imageWidget = Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        cacheWidth: 800,
+        cacheHeight: 450,
+        errorBuilder: (context, error, stackTrace) {
+          final fallbackUrl =
+              FoodImageHelper.getEffectiveImageUrl(item.name, item.category);
+          return Image.network(
+            fallbackUrl,
+            fit: BoxFit.cover,
+            cacheWidth: 800,
+            cacheHeight: 450,
+            errorBuilder: (_, _, _) => _buildCategoryBannerFallback(item),
+          );
+        },
+      );
+    } else {
+      final photoUrl =
+          FoodImageHelper.getEffectiveImageUrl(item.name, item.category);
+      imageWidget = Image.network(
+        photoUrl,
+        fit: BoxFit.cover,
+        cacheWidth: 800,
+        cacheHeight: 450,
+        errorBuilder: (context, error, stackTrace) =>
+            _buildCategoryBannerFallback(item),
+      );
     }
 
-    final photoUrl = FoodImageHelper.getEffectiveImageUrl(item.name, item.category);
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        Image.network(
-          photoUrl,
-          fit: BoxFit.cover,
-          cacheWidth: 800,
-          cacheHeight: 450,
-          errorBuilder: (context, error, stackTrace) => _buildCategoryBannerFallback(item),
-        ),
-        Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black.withValues(alpha: 0.45),
-                Colors.transparent,
-                Colors.black.withValues(alpha: 0.75),
-              ],
+    return GestureDetector(
+      onTap: () => FullScreenImageViewer.show(
+        context,
+        imagePath: effectiveZoomPath,
+        title: item.name,
+        subtitle: formattedQty,
+      ),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          imageWidget,
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Colors.black.withValues(alpha: 0.45),
+                  Colors.transparent,
+                  Colors.black.withValues(alpha: 0.75),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+          Positioned(
+            bottom: 14,
+            right: 14,
+            child: Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.65),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.3),
+                  width: 1,
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.zoom_in_rounded, size: 14, color: Colors.white),
+                  SizedBox(width: 4),
+                  Text(
+                    'Tap to Zoom',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

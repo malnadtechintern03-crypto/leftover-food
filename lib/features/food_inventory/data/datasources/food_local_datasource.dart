@@ -595,22 +595,22 @@ class FoodLocalDataSourceImpl implements FoodLocalDataSource {
       if (db != null) {
         final placeholders = List.filled(groceryCats.length, '?').join(', ');
 
-        // 1. Purge any legacy non-grocery food items immediately
-        await db.delete(
-          AppConstants.foodTable,
-          where: 'category NOT IN ($placeholders)',
-          whereArgs: groceryCats,
-        );
-
-        // 2. Check if valid grocery items exist in the database
+        // 1. Quick check if valid grocery items already exist in the database
         final count = Sqflite.firstIntValue(
           await db.rawQuery(
-            'SELECT COUNT(*) FROM ${AppConstants.foodTable} WHERE category IN ($placeholders)',
+            'SELECT COUNT(*) FROM ${AppConstants.foodTable} WHERE category IN ($placeholders) LIMIT 1',
             groceryCats,
           ),
         );
 
         if (count != null && count > 0) return;
+
+        // 2. If table is unseeded, purge legacy non-groceries and seed
+        await db.delete(
+          AppConstants.foodTable,
+          where: 'category NOT IN ($placeholders)',
+          whereArgs: groceryCats,
+        );
       } else {
         if (_seededInMemory && _memoryStore.isNotEmpty) return;
       }

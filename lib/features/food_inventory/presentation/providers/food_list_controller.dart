@@ -173,6 +173,7 @@ class FoodListController extends StateNotifier<FoodListState> {
     double? minStock,
     String? barcode,
     String? imagePath,
+    String? notes,
   }) async {
     try {
       final now = DateTime.now();
@@ -189,6 +190,7 @@ class FoodListController extends StateNotifier<FoodListState> {
         minimumStock: minStock,
         barcode: barcode,
         imagePath: imagePath,
+        notes: notes,
         createdAt: now,
         updatedAt: now,
       );

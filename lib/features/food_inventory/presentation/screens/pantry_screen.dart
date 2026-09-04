@@ -38,11 +38,6 @@ class PantryScreen extends ConsumerWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.qr_code_scanner_rounded, color: ColorPalette.freshEmerald),
-            tooltip: 'Scan Barcode',
-            onPressed: () => context.push(RoutePaths.barcodeScanner),
-          ),
-          IconButton(
             icon: const Icon(Icons.flash_on_rounded, color: ColorPalette.freshEmerald),
             tooltip: 'Quick Add',
             onPressed: () => QuickAddDialog.show(context),
@@ -93,7 +88,6 @@ class PantryScreen extends ConsumerWidget {
                     initialQuery: listState.filter.searchQuery,
                     currentSort: listState.filter.sortOption,
                     hintText: 'Search products, medicines, barcodes...',
-                    onScanPressed: () => context.push(RoutePaths.barcodeScanner),
                     onQueryChanged: (query) {
                       ref
                           .read(foodListControllerProvider.notifier)
@@ -476,28 +470,10 @@ class PantryScreen extends ConsumerWidget {
                       color: ColorPalette.freshEmerald.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.qr_code_scanner_rounded, color: ColorPalette.freshEmerald, size: 22),
+                    child: const Icon(Icons.flash_on_rounded, color: ColorPalette.freshEmerald, size: 22),
                   ),
-                  title: const Text('Scan Grocery Barcode', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
-                  subtitle: const Text('Point camera at product SKU for instant lookup', style: TextStyle(fontSize: 12)),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () {
-                    Navigator.of(context).pop();
-                    context.push(RoutePaths.barcodeScanner);
-                  },
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: ColorPalette.warningAmber.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.flash_on_rounded, color: ColorPalette.warningAmber, size: 22),
-                  ),
-                  title: const Text('Quick Add (Smart Presets)', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
-                  subtitle: const Text('Add milk, rice, bread, or staples in seconds', style: TextStyle(fontSize: 12)),
+                  title: const Text('Quick Add (Scan & Presets)', style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14.5)),
+                  subtitle: const Text('Scan barcode or pick staples to add in seconds', style: TextStyle(fontSize: 12)),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () {
                     Navigator.of(context).pop();

@@ -159,6 +159,7 @@ class MockFoodListController extends StateNotifier<FoodListState>
     double? minStock,
     String? barcode,
     String? imagePath,
+    String? notes,
   }) async {}
 
 

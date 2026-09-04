@@ -114,10 +114,15 @@ class FoodImageHelper {
     'ghee': 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=400&q=80',
 
     // 🍪 Snacks & Packaged Foods
-    'biscuits': 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=400&q=80',
-    'cookies': 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=400&q=80',
+    'maggi': 'https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=400&q=80',
+    'ramen': 'https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=400&q=80',
     'noodles': 'https://images.unsplash.com/photo-1612927601601-6638404737ce?auto=format&fit=crop&w=400&q=80',
     'pasta': 'https://images.unsplash.com/photo-1551183053-bf91a1d81141?auto=format&fit=crop&w=400&q=80',
+    'chips': 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80',
+    'kurkure': 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80',
+    'lays': 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=400&q=80',
+    'biscuits': 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=400&q=80',
+    'cookies': 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=400&q=80',
 
     // ☕ Beverages
     'green tea': 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=400&q=80',
@@ -162,6 +167,22 @@ class FoodImageHelper {
   /// Banner image URL for the hero card (clean pantry jars)
   static const String pantryHeroImageUrl =
       'https://images.unsplash.com/photo-1584473457406-624048518851?auto=format&fit=crop&w=1200&q=85';
+
+  /// Returns the effective image URL or local file path for an item, matching the resolution used across the app
+  static String getEffectiveItemImagePath(FoodItem item) {
+    final imagePath = item.imagePath?.trim();
+    if (imagePath != null &&
+        (imagePath.startsWith('http://') || imagePath.startsWith('https://'))) {
+      return imagePath;
+    }
+    if (imagePath != null &&
+        imagePath.isNotEmpty &&
+        !kIsWeb &&
+        File(imagePath).existsSync()) {
+      return imagePath;
+    }
+    return getEffectiveImageUrl(item.name, item.category);
+  }
 
   /// Returns a curated photo URL for items by name or category fallback
   static String getEffectiveImageUrl(String productName, FoodCategory category) {

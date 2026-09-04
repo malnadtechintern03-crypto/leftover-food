@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:foodsave/core/constants/app_constants.dart';
 import 'package:foodsave/features/splash/presentation/screens/splash_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -11,7 +10,7 @@ void main() {
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
-  testWidgets('SplashScreen renders logo, app name, and tagline instantly', (WidgetTester tester) async {
+  testWidgets('SplashScreen renders centered logo on pure black background just like ChatGPT', (WidgetTester tester) async {
     SharedPreferences.setMockInitialValues({});
 
     await tester.pumpWidget(
@@ -24,12 +23,11 @@ void main() {
       ),
     );
 
-    // Verify initial visual elements
-    expect(find.text(AppConstants.appName), findsOneWidget);
-    expect(find.text(AppConstants.appTagline), findsOneWidget);
+    // Verify centered logo image is rendered on pitch black background
     expect(find.byType(Image), findsOneWidget);
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    final scaffold = tester.widget<Scaffold>(find.byType(Scaffold));
+    expect(scaffold.backgroundColor, Colors.black);
 
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 600));
   });
 }

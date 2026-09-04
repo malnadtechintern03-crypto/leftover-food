@@ -60,14 +60,40 @@ void main() {
       expect(surf!.name, contains('Surf Excel'));
       expect(surf.category, FoodCategory.householdCleaning);
 
-      // 5. Electronics & Batteries (Duracell)
+      // 5. Electronics & Batteries (Duracell & Apple)
       final duracell = await lookupService.lookupProduct('5000394017771');
       expect(duracell, isNotNull);
       expect(duracell!.name, contains('Duracell'));
       expect(duracell.category, FoodCategory.electronicsAndHardware);
       expect(duracell.defaultShelfLifeDays, 1825);
 
-      // 6. Pet Supplies (Pedigree)
+      final appleAdapter = await lookupService.lookupProduct('194252031353');
+      expect(appleAdapter, isNotNull);
+      expect(appleAdapter!.name, contains('Apple 20W'));
+      expect(appleAdapter.category, FoodCategory.electronicsAndHardware);
+      expect(appleAdapter.brand, 'Apple');
+      expect(appleAdapter.description, isNotNull);
+      expect(appleAdapter.description, contains('USB-C'));
+
+      // 6. Books / ISBN (Clean Code)
+      final book = await lookupService.lookupProduct('9780132350884');
+      expect(book, isNotNull);
+      expect(book!.name, contains('Clean Code'));
+      expect(book.category, FoodCategory.stationeryAndOffice);
+      expect(book.brand, 'Robert C. Martin');
+      expect(book.description, isNotNull);
+      expect(book.description, contains('craftsmanship'));
+      expect(book.storageLocation, StorageLocation.kitchenCabinet);
+      expect(book.defaultShelfLifeDays, 3650);
+
+      // 7. Stationery & Office (Post-it notes)
+      final postIt = await lookupService.lookupProduct('051141920152');
+      expect(postIt, isNotNull);
+      expect(postIt!.name, contains('Post-it'));
+      expect(postIt.category, FoodCategory.stationeryAndOffice);
+      expect(postIt.description, isNotNull);
+
+      // 8. Pet Supplies (Pedigree)
       final pedigree = await lookupService.lookupProduct('8906002480111');
       expect(pedigree, isNotNull);
       expect(pedigree!.name, contains('Pedigree'));
@@ -76,6 +102,47 @@ void main() {
       final unknown = await lookupService.lookupProduct('0000000000000');
       // When offline or uncatalogued, unknown barcode returns null for manual entry
       expect(unknown, isNull);
+    });
+
+    test('BarcodeLookupService smart fallback identifies GS1 origin and assigns logical defaults', () {
+      // India origin
+      final indiaFallback = BarcodeLookupService.createSmartFallbackProduct('8909999999999');
+      expect(indiaFallback.name, contains('India'));
+      expect(indiaFallback.storageLocation, StorageLocation.pantry);
+      expect(indiaFallback.description, contains('India'));
+
+      // Book / ISBN origin
+      final isbnFallback = BarcodeLookupService.createSmartFallbackProduct('9781234567890');
+      expect(isbnFallback.name, contains('Book (ISBN)'));
+      expect(isbnFallback.category, FoodCategory.stationeryAndOffice);
+      expect(isbnFallback.storageLocation, StorageLocation.kitchenCabinet);
+
+      // US / Canada origin
+      final usFallback = BarcodeLookupService.createSmartFallbackProduct('012345678905');
+      expect(usFallback.name, contains('US / Canada'));
+
+      // UK origin
+      final ukFallback = BarcodeLookupService.createSmartFallbackProduct('5012345678901');
+      expect(ukFallback.name, contains('United Kingdom'));
+    });
+
+    test('inferCategory and inferStorageLocation accurately classify non-grocery and grocery products', () {
+      // Category inference
+      expect(BarcodeLookupService.inferCategory('Harry Potter Paperback Novel Book'), FoodCategory.stationeryAndOffice);
+      expect(BarcodeLookupService.inferCategory('Logitech Wireless Keyboard USB'), FoodCategory.electronicsAndHardware);
+      expect(BarcodeLookupService.inferCategory('SanDisk Ultra 64GB Flash Drive'), FoodCategory.electronicsAndHardware);
+      expect(BarcodeLookupService.inferCategory('Crocin Cold & Flu Paracetamol'), FoodCategory.medicines);
+      expect(BarcodeLookupService.inferCategory('Colgate Total Whitening Toothpaste'), FoodCategory.personalCare);
+      expect(BarcodeLookupService.inferCategory('Amul Taaza Homogenised Milk'), FoodCategory.dairy);
+
+      // Storage location inference
+      expect(BarcodeLookupService.inferStorageLocation(FoodCategory.dairy), StorageLocation.fridge);
+      expect(BarcodeLookupService.inferStorageLocation(FoodCategory.medicines), StorageLocation.kitchenCabinet);
+      expect(BarcodeLookupService.inferStorageLocation(FoodCategory.personalCare), StorageLocation.kitchenCabinet);
+      expect(BarcodeLookupService.inferStorageLocation(FoodCategory.stationeryAndOffice), StorageLocation.kitchenCabinet);
+      expect(BarcodeLookupService.inferStorageLocation(FoodCategory.electronicsAndHardware), StorageLocation.kitchenCabinet);
+      expect(BarcodeLookupService.inferStorageLocation(FoodCategory.grainsAndPulses), StorageLocation.pantry);
+      expect(BarcodeLookupService.inferStorageLocation(FoodCategory.householdCleaning), StorageLocation.pantry);
     });
 
     test('ExpiryDateExtractor correctly estimates shelf life and parses date text for any product', () {

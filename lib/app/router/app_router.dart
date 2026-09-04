@@ -9,14 +9,20 @@ import '../../features/food_inventory/presentation/screens/food_detail_screen.da
 import '../../features/settings/presentation/screens/notifications_center_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/shopping_list/presentation/screens/shopping_list_screen.dart';
+import '../../features/splash/presentation/screens/splash_screen.dart';
 import '../presentation/main_navigation_scaffold.dart';
 import 'route_names.dart';
 import 'route_paths.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: RoutePaths.home,
+    initialLocation: RoutePaths.splash,
     routes: [
+      GoRoute(
+        path: RoutePaths.splash,
+        name: RouteNames.splash,
+        builder: (context, state) => const SplashScreen(),
+      ),
       GoRoute(
         path: RoutePaths.home,
         name: RouteNames.home,

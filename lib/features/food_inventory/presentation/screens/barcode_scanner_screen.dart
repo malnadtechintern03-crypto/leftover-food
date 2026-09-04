@@ -924,6 +924,7 @@ class _ProductCapturedModalSheetState extends ConsumerState<_ProductCapturedModa
   void _onCategoryChanged(FoodCategory category) {
     setState(() {
       _selectedCategory = category;
+      _selectedLocation = BarcodeLookupService.inferStorageLocation(category);
       // Auto-recalculate expiry date if the user changes product category
       _selectedExpiryDate = ExpiryDateExtractor.estimateExpiryDate(
         category: category,
@@ -1114,6 +1115,70 @@ class _ProductCapturedModalSheetState extends ConsumerState<_ProductCapturedModa
                 ),
               ),
 
+              // Product Details / Specifications Card (if available from barcode API)
+              if (widget.product.description != null && widget.product.description!.trim().isNotEmpty) ...[
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDark ? ColorPalette.darkSurface : ColorPalette.lightSurface,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark ? ColorPalette.darkBorder : ColorPalette.lightBorder,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.notes_rounded, size: 15, color: theme.colorScheme.primary),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Product Details & Info',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
+                            ),
+                          ),
+                          if (widget.product.packageSize != null && widget.product.packageSize!.isNotEmpty) ...[
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.primary.withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                widget.product.packageSize!,
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: theme.colorScheme.primary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        widget.product.description!,
+                        maxLines: 4,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12,
+                          height: 1.35,
+                          color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 12),
 
               // Category Selector Chips Row
@@ -1174,6 +1239,64 @@ class _ProductCapturedModalSheetState extends ConsumerState<_ProductCapturedModa
 
               const SizedBox(height: 12),
 
+              // Storage Location Selector Chips Row
+              Text(
+                'Storage Location',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              SizedBox(
+                height: 38,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: StorageLocation.values.length,
+                  separatorBuilder: (context, index) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) {
+                    final loc = StorageLocation.values[index];
+                    final isSelected = loc == _selectedLocation;
+                    return InkWell(
+                      onTap: () => setState(() => _selectedLocation = loc),
+                      borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isSelected ? loc.color : loc.color.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(
+                            color: isSelected ? loc.color : loc.color.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              loc.icon,
+                              size: 16,
+                              color: isSelected ? Colors.white : loc.color,
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              loc.label,
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w800,
+                                color: isSelected ? Colors.white : loc.color,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
               // Auto-Calculated Expiry Info Card (Tap to customize date)
               InkWell(
                 onTap: _pickCustomExpiryDate,
@@ -1220,6 +1343,11 @@ class _ProductCapturedModalSheetState extends ConsumerState<_ProductCapturedModa
                     flex: 1,
                     child: OutlinedButton(
                       onPressed: () {
+                        final effectiveNotes = widget.product.description ??
+                            (widget.product.brand != null && widget.product.brand!.isNotEmpty
+                                ? 'Brand: ${widget.product.brand}'
+                                : null);
+
                         Navigator.of(context).pop();
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -1239,6 +1367,7 @@ class _ProductCapturedModalSheetState extends ConsumerState<_ProductCapturedModa
                                 minimumStock: widget.product.minimumStock,
                                 barcode: widget.product.barcode,
                                 imagePath: imageUrl,
+                                notes: effectiveNotes,
                                 createdAt: DateTime.now(),
                                 updatedAt: DateTime.now(),
                               ),
@@ -1284,6 +1413,11 @@ class _ProductCapturedModalSheetState extends ConsumerState<_ProductCapturedModa
                                   ? _nameController.text.trim()
                                   : 'Scanned Item (${widget.product.barcode})';
 
+                              final effectiveNotes = widget.product.description ??
+                                  (widget.product.brand != null && widget.product.brand!.isNotEmpty
+                                      ? 'Brand: ${widget.product.brand}'
+                                      : null);
+
                               await ref.read(foodListControllerProvider.notifier).quickAddFood(
                                     name: name,
                                     quantity: _quantity,
@@ -1295,6 +1429,7 @@ class _ProductCapturedModalSheetState extends ConsumerState<_ProductCapturedModa
                                     minStock: widget.product.minimumStock,
                                     barcode: widget.product.barcode,
                                     imagePath: imageUrl,
+                                    notes: effectiveNotes,
                                   );
 
                               if (mounted && context.mounted) {

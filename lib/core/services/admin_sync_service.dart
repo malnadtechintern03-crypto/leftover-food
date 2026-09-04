@@ -29,6 +29,9 @@ class AdminSyncService {
 
   /// Discovers the active working REST API endpoint
   static Future<String?> getWorkingBaseUrl() async {
+    if (Platform.environment.containsKey('FLUTTER_TEST')) {
+      return null;
+    }
     if (_resolvedBaseUrl != null) return _resolvedBaseUrl;
 
     final client = HttpClient();
