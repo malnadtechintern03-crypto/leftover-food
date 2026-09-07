@@ -44,11 +44,6 @@ $admin = get_logged_in_admin();
       <span>Categories</span>
     </a>
 
-    <a href="<?= base_url('recipes/index.php') ?>" class="admin-nav-item <?= str_contains($currentUri, 'recipes') ? 'active' : '' ?>">
-      <span class="material-symbols-rounded">restaurant_menu</span>
-      <span>Recipes</span>
-    </a>
-
     <a href="<?= base_url('announcements/index.php') ?>" class="admin-nav-item <?= str_contains($currentUri, 'announcements') ? 'active' : '' ?>">
       <span class="material-symbols-rounded">campaign</span>
       <span>Announcements</span>

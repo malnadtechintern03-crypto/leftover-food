@@ -140,41 +140,26 @@ class UseItFirstSection extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: () {
-                                context.pushNamed(
-                                  RouteNames.foodDetail,
-                                  pathParameters: {'id': item.id},
-                                );
-                              },
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: const Text('Details', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700)),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: () {
+                            context.pushNamed(
+                              RouteNames.foodDetail,
+                              pathParameters: {'id': item.id},
+                            );
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: ColorPalette.freshEmerald,
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // Navigate to Recipes tab or screen
-                                context.pushNamed(RouteNames.recipes);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: ColorPalette.freshEmerald,
-                                padding: const EdgeInsets.symmetric(vertical: 4),
-                                minimumSize: Size.zero,
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                              ),
-                              child: const Text('Recipes', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white)),
-                            ),
-                          ),
-                        ],
+                          child: const Text('View Details', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white)),
+                        ),
                       ),
                     ],
                   ),

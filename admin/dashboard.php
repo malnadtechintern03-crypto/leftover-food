@@ -14,8 +14,6 @@ $db = Database::getConnection();
 
 // 1. Fetch Real Counts from MySQL
 $categoryCount = (int)$db->query('SELECT COUNT(*) FROM categories')->fetchColumn();
-$recipeCount = (int)$db->query('SELECT COUNT(*) FROM recipes')->fetchColumn();
-$ingredientCount = (int)$db->query('SELECT COUNT(*) FROM recipe_ingredients')->fetchColumn();
 $announcementCount = (int)$db->query('SELECT COUNT(*) FROM announcements')->fetchColumn();
 
 // 2. Product Expiration Metrics
@@ -35,17 +33,6 @@ $expiringStmt = $db->query("
     LIMIT 5
 ");
 $recentExpiring = $expiringStmt->fetchAll();
-
-// 4. Fetch Recent Recipes
-$recipesStmt = $db->query('
-    SELECT r.id, r.title, r.prep_time, r.difficulty, r.calories, r.status, r.created_at, c.name AS category_name,
-           (SELECT COUNT(*) FROM recipe_ingredients WHERE recipe_id = r.id) AS ingredient_count
-    FROM recipes r
-    LEFT JOIN categories c ON r.category_id = c.id
-    ORDER BY r.id DESC
-    LIMIT 5
-');
-$recentRecipes = $recipesStmt->fetchAll();
 
 // 5. Fetch Recent Categories
 $categoriesStmt = $db->query('
@@ -244,88 +231,14 @@ require_once __DIR__ . '/includes/header.php';
 <?php endif; ?>
 
 <div class="row g-4">
-  <!-- Recent Smart Recipes Table -->
-  <div class="col-lg-8">
-    <div class="card-box mb-0">
+  <!-- Categories Overview -->
+  <div class="col-lg-6">
+    <div class="card-box mb-0 h-100">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <div>
-          <h3 class="fw-bold mb-0" style="font-size: 16px;">Recent Smart Recipes</h3>
-          <span class="text-muted small">Latest recipe entries configured for inventory matching</span>
+          <h3 class="fw-bold mb-0" style="font-size: 16px;">Active Categories</h3>
+          <span class="text-muted small">Configured food and grocery classifications</span>
         </div>
-        <a href="<?= base_url('recipes/index.php') ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-          View All
-        </a>
-      </div>
-
-      <?php if (empty($recentRecipes)): ?>
-        <div class="empty-state py-4">
-          <div class="empty-icon"><span class="material-symbols-rounded">restaurant_menu</span></div>
-          <div class="empty-title">No data available.</div>
-          <p class="empty-text">Add recipes to enable smart recipe matching in the mobile app.</p>
-          <a href="<?= base_url('recipes/create.php') ?>" class="btn btn-primary-custom">Add First Recipe</a>
-        </div>
-      <?php else: ?>
-        <div class="table-responsive">
-          <table class="custom-table">
-            <thead>
-              <tr>
-                <th>Recipe</th>
-                <th>Category</th>
-                <th>Time & Cal</th>
-                <th>Ingredients</th>
-                <th>Status</th>
-                <th class="text-end">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php foreach ($recentRecipes as $recipe): ?>
-                <tr>
-                  <td>
-                    <div class="fw-bold text-dark"><?= e($recipe['title']) ?></div>
-                    <div class="text-muted" style="font-size: 11.5px;">Added <?= format_date($recipe['created_at']) ?></div>
-                  </td>
-                  <td>
-                    <span class="badge bg-light text-dark border px-2 py-1 rounded-3">
-                      <?= e($recipe['category_name'] ?? 'Unassigned') ?>
-                    </span>
-                  </td>
-                  <td>
-                    <div class="small fw-semibold"><?= e($recipe['prep_time']) ?></div>
-                    <div class="text-muted" style="font-size: 11px;"><?= $recipe['calories'] ?> kcal</div>
-                  </td>
-                  <td>
-                    <span class="badge bg-emerald-subtle text-success px-2 py-1 rounded-pill fw-bold" style="background: rgba(16, 185, 129, 0.12);">
-                      <?= $recipe['ingredient_count'] ?> mapped
-                    </span>
-                  </td>
-                  <td>
-                    <span class="badge-status <?= e($recipe['status']) ?>">
-                      <?= ucfirst(e($recipe['status'])) ?>
-                    </span>
-                  </td>
-                  <td class="text-end">
-                    <a href="<?= base_url('recipes/edit.php?id=' . $recipe['id']) ?>" class="btn-action-icon" title="Edit">
-                      <span class="material-symbols-rounded" style="font-size: 16px;">edit</span>
-                    </a>
-                    <a href="<?= base_url('recipes/ingredients.php?recipe_id=' . $recipe['id']) ?>" class="btn-action-icon" title="Manage Ingredients">
-                      <span class="material-symbols-rounded" style="font-size: 16px;">grocery</span>
-                    </a>
-                  </td>
-                </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
-        </div>
-      <?php endif; ?>
-    </div>
-  </div>
-
-  <!-- Recent Categories & Activity Sidebar -->
-  <div class="col-lg-4">
-    <!-- Categories Overview -->
-    <div class="card-box mb-4">
-      <div class="d-flex align-items-center justify-content-between mb-3">
-        <h3 class="fw-bold mb-0" style="font-size: 16px;">Active Categories</h3>
         <a href="<?= base_url('categories/index.php') ?>" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
           Manage
         </a>
@@ -341,7 +254,7 @@ require_once __DIR__ . '/includes/header.php';
             <div class="list-group-item px-0 py-2.5 d-flex align-items-center justify-content-between border-bottom">
               <div>
                 <div class="fw-bold small text-dark"><?= e($category['name']) ?></div>
-                <div class="text-muted" style="font-size: 11.5px;"><?= $category['recipe_count'] ?> recipes linked</div>
+                <div class="text-muted" style="font-size: 11.5px;">Status: <?= ucfirst(e($category['status'])) ?></div>
               </div>
               <span class="badge-status <?= e($category['status']) ?>">
                 <?= ucfirst(e($category['status'])) ?>
@@ -351,14 +264,16 @@ require_once __DIR__ . '/includes/header.php';
         </div>
       <?php endif; ?>
     </div>
+  </div>
 
-    <!-- System Status Card -->
-    <div class="card-box">
+  <!-- System Status & REST API -->
+  <div class="col-lg-6">
+    <div class="card-box mb-0 h-100">
       <h3 class="fw-bold mb-3" style="font-size: 16px;">Environment & REST API</h3>
       <div class="p-3 bg-light rounded-3 border mb-3">
         <div class="d-flex align-items-center justify-content-between mb-2">
           <span class="small text-muted">Web Server</span>
-          <span class="badge bg-success">Apache (XAMPP)</span>
+          <span class="badge bg-success">Apache / PHP CLI</span>
         </div>
         <div class="d-flex align-items-center justify-content-between mb-2">
           <span class="small text-muted">PHP Engine</span>

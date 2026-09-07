@@ -308,7 +308,7 @@ class HomeScreen extends ConsumerWidget {
 
               const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-              // 5. "Use It First" Section (Urgent items with Details + Recipes actions)
+              // 5. "Use It First" Section (Urgent items with Details action)
               if (urgentItems.isNotEmpty)
                 SliverToBoxAdapter(
                   child: UseItFirstSection(urgentItems: urgentItems),
