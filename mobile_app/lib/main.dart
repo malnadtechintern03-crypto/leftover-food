@@ -1,37 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'app/app.dart';
 import 'core/services/app_initializer.dart';
-import 'features/settings/presentation/providers/settings_controller.dart';
 
-void main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Prepare non-blocking desktop FFI / platform hooks early
   AppInitializer.instance.ensureEarlyBindings();
 
-  // Kick off background initialization immediately so database & background tasks prepare in parallel
+  // Kick off background initialization immediately in parallel without blocking UI rendering
   AppInitializer.instance.initialize();
 
-  // Pre-load SharedPreferences before runApp so saved theme is restored on the very first frame
-  SharedPreferences? prefs;
-  try {
-    prefs = await SharedPreferences.getInstance().timeout(
-      const Duration(milliseconds: 3000),
-    );
-    AppInitializer.instance.setSharedPreferences(prefs);
-  } catch (e) {
-    debugPrint('SharedPreferences early init note: $e');
-  }
-
-  // Launch the application tree immediately with restored preferences
+  // Launch the application tree immediately so the logo animation renders on frame 1
   runApp(
-    ProviderScope(
-      overrides: [
-        if (prefs != null) sharedPreferencesProvider.overrideWithValue(prefs),
-      ],
-      child: const HomePantryApp(),
+    const ProviderScope(
+      child: HomePantryApp(),
     ),
   );
 }
