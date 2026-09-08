@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:foodsave/app/theme/app_theme.dart';
 import 'package:foodsave/features/food_inventory/domain/entities/food_category.dart';
 import 'package:foodsave/features/food_inventory/domain/entities/food_item.dart';
 import 'package:foodsave/features/food_inventory/domain/entities/food_unit.dart';
@@ -31,7 +30,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         child: MaterialApp(
-          theme: AppTheme.lightTheme,
+          theme: ThemeData(useMaterial3: true),
           home: Scaffold(
             body: FoodCard(
               item: item,

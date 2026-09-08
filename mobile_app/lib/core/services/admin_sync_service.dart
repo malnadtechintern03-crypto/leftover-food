@@ -66,13 +66,15 @@ class AdminSyncService {
     }
 
     final client = HttpClient();
-    client.connectionTimeout = const Duration(seconds: 2);
+    client.connectionTimeout = const Duration(seconds: 3);
 
-    for (final candidate in _candidateBaseUrls) {
+    for (int i = 0; i < _candidateBaseUrls.length; i++) {
+      final candidate = _candidateBaseUrls[i];
+      final timeoutDuration = i == 0 ? const Duration(milliseconds: 2500) : const Duration(milliseconds: 1500);
       try {
         final statusUri = Uri.parse('$candidate/api/status.php');
-        final request = await client.getUrl(statusUri).timeout(const Duration(seconds: 1));
-        final response = await request.close().timeout(const Duration(seconds: 1));
+        final request = await client.getUrl(statusUri).timeout(timeoutDuration);
+        final response = await request.close().timeout(timeoutDuration);
         if (response.statusCode == 200) {
           _resolvedBaseUrl = candidate;
           client.close();
@@ -82,8 +84,8 @@ class AdminSyncService {
       } catch (_) {
         try {
           final uri = Uri.parse('$candidate/api/categories.php');
-          final request = await client.getUrl(uri).timeout(const Duration(seconds: 1));
-          final response = await request.close().timeout(const Duration(seconds: 1));
+          final request = await client.getUrl(uri).timeout(timeoutDuration);
+          final response = await request.close().timeout(timeoutDuration);
           if (response.statusCode == 200) {
             _resolvedBaseUrl = candidate;
             client.close();

@@ -10,6 +10,7 @@ import '../../../../core/services/product_sync_service.dart';
 import '../../../../core/utils/app_review_helper.dart';
 import '../../../food_inventory/presentation/providers/food_inventory_providers.dart';
 import '../../../food_inventory/presentation/providers/food_list_controller.dart';
+import '../../../food_inventory/presentation/providers/food_stats_controller.dart';
 import '../providers/settings_controller.dart';
 import '../widgets/food_tips_sheet.dart';
 
@@ -723,14 +724,14 @@ class SettingsScreen extends ConsumerWidget {
 
 /// Widget that displays the connectivity status to the PHP/MySQL Admin Backend
 /// and provides manual sync and endpoint configuration capabilities.
-class _AdminConnectivityCard extends StatefulWidget {
+class _AdminConnectivityCard extends ConsumerStatefulWidget {
   const _AdminConnectivityCard();
 
   @override
-  State<_AdminConnectivityCard> createState() => _AdminConnectivityCardState();
+  ConsumerState<_AdminConnectivityCard> createState() => _AdminConnectivityCardState();
 }
 
-class _AdminConnectivityCardState extends State<_AdminConnectivityCard> {
+class _AdminConnectivityCardState extends ConsumerState<_AdminConnectivityCard> {
   bool _isChecking = false;
   bool _isSyncing = false;
   bool? _isConnected;
@@ -785,6 +786,9 @@ class _AdminConnectivityCardState extends State<_AdminConnectivityCard> {
 
     try {
       final syncResult = await ProductSyncService.instance.performFullSync();
+      // Instantly reload Riverpod items and stats so the UI immediately updates
+      ref.read(foodListControllerProvider.notifier).loadItems();
+      ref.read(foodStatsControllerProvider.notifier).loadStats();
       if (!mounted) return;
 
       final String message;

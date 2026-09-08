@@ -39,6 +39,7 @@ try {
         'qr_code' => 'VARCHAR(255) NULL AFTER `barcode`',
         'category_id' => 'INT NULL AFTER `category`',
         'subcategory_id' => 'INT NULL AFTER `subcategory`',
+        'description' => 'TEXT NULL AFTER `subcategory_id`',
         'currency' => "VARCHAR(10) NOT NULL DEFAULT '₹' AFTER `purchase_price`",
         'manufacturer' => 'VARCHAR(150) NULL AFTER `storage_location`',
         'country_of_origin' => 'VARCHAR(100) NULL AFTER `manufacturer`',
@@ -63,6 +64,47 @@ try {
             try {
                 $db->exec("ALTER TABLE `products` ADD COLUMN `{$col}` {$definition}");
                 $messages[] = "Added column `products`.`{$col}`";
+            } catch (PDOException $e) {
+                // Skip if exists
+            }
+        }
+    }
+
+    // 2b. Dynamically check and add missing columns in `categories` table
+    $catCols = [
+        'sort_order' => 'INT NOT NULL DEFAULT 0 AFTER `status`',
+        'image_url' => 'TEXT NULL AFTER `sort_order`',
+    ];
+    $existingCatCols = [];
+    $stmt = $db->query("SHOW COLUMNS FROM categories");
+    while ($row = $stmt->fetch()) {
+        $existingCatCols[] = strtolower($row['Field']);
+    }
+    foreach ($catCols as $col => $definition) {
+        if (!in_array(strtolower($col), $existingCatCols, true)) {
+            try {
+                $db->exec("ALTER TABLE `categories` ADD COLUMN `{$col}` {$definition}");
+                $messages[] = "Added column `categories`.`{$col}`";
+            } catch (PDOException $e) {
+                // Skip if exists
+            }
+        }
+    }
+
+    // 2c. Dynamically check and add missing columns in `product_reminders` table
+    $remCols = [
+        'last_sent_at' => 'DATETIME NULL AFTER `is_sent`',
+    ];
+    $existingRemCols = [];
+    $stmt = $db->query("SHOW COLUMNS FROM product_reminders");
+    while ($row = $stmt->fetch()) {
+        $existingRemCols[] = strtolower($row['Field']);
+    }
+    foreach ($remCols as $col => $definition) {
+        if (!in_array(strtolower($col), $existingRemCols, true)) {
+            try {
+                $db->exec("ALTER TABLE `product_reminders` ADD COLUMN `{$col}` {$definition}");
+                $messages[] = "Added column `product_reminders`.`{$col}`";
             } catch (PDOException $e) {
                 // Skip if exists
             }

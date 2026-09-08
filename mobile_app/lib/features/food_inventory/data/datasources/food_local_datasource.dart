@@ -85,14 +85,16 @@ class FoodLocalDataSourceImpl implements FoodLocalDataSource {
 
         // Category filter
         if (f.category != null) {
-          whereClauses.add('category = ?');
+          whereClauses.add('(category = ? OR category = ?)');
           whereArgs.add(f.category!.name);
+          whereArgs.add(f.category!.label);
         }
 
         // Storage Location filter
         if (f.storageLocation != null) {
-          whereClauses.add('storage_location = ?');
+          whereClauses.add('(storage_location = ? OR storage_location = ?)');
           whereArgs.add(f.storageLocation!.name);
+          whereArgs.add(f.storageLocation!.label);
         }
 
         // Favorite filter

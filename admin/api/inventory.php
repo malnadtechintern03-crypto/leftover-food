@@ -24,10 +24,10 @@ try {
     $includeConsumed = isset($_GET['include_consumed']) && $_GET['include_consumed'] === '1';
 
     $page = max(1, (int)($_GET['page'] ?? 1));
-    $limit = max(1, min(100, (int)($_GET['limit'] ?? 50)));
+    $limit = max(1, min(2000, (int)($_GET['limit'] ?? 100)));
     $offset = ($page - 1) * $limit;
 
-    $where = [];
+    $where = ["p.status != 'Archived'"];
     $params = [];
 
     if (!$includeConsumed) {

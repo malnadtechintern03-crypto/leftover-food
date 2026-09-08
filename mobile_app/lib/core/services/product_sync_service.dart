@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../constants/app_constants.dart';
 import '../database/database_helper.dart';
+import '../../features/food_inventory/domain/entities/food_category.dart';
+import '../../features/food_inventory/domain/entities/storage_location.dart';
 import 'admin_sync_service.dart';
 
 class ProductSyncResult {
@@ -158,24 +160,27 @@ class ProductSyncService {
 
     int pulled = 0;
     try {
-      final uri = Uri.parse('$effectiveBaseUrl/inventory.php?limit=100&include_consumed=1');
+      final uri = Uri.parse('$effectiveBaseUrl/inventory.php?limit=1000&include_consumed=1');
       final res = await http.get(uri).timeout(const Duration(seconds: 8));
 
       if (res.statusCode == 200) {
         final dynamic decoded = jsonDecode(res.body);
         if (decoded is Map<String, dynamic> && decoded['data'] is List) {
           final items = decoded['data'] as List;
+          final remoteProductIds = <String>{};
 
           for (final raw in items) {
             if (raw is Map<String, dynamic>) {
               final id = raw['id']?.toString() ?? '';
               if (id.isEmpty) continue;
+              remoteProductIds.add(id);
 
               final name = raw['name']?.toString() ?? 'Unnamed Product';
               final brand = raw['brand']?.toString();
               final barcode = raw['barcode']?.toString();
               final imagePath = raw['image_path']?.toString();
-              final category = raw['category']?.toString() ?? 'Other Groceries';
+              final rawCategory = raw['category']?.toString() ?? 'Other Products';
+              final category = FoodCategory.fromString(rawCategory).name;
               final subcategory = raw['subcategory']?.toString();
               final quantity = (raw['quantity'] as num?)?.toDouble() ?? 1.0;
               final unit = raw['unit']?.toString() ?? 'pieces';
@@ -188,7 +193,8 @@ class ProductSyncService {
               final reminderDaysBefore = raw['reminder_days_before']?.toString() ?? '7';
               final notificationId = (raw['notification_id'] as num?)?.toInt() ?? abs(id.hashCode);
               final expiryStatus = raw['calculated_status']?.toString() ?? raw['expiry_status']?.toString() ?? 'Safe';
-              final storageLocation = raw['storage_location']?.toString() ?? 'pantry';
+              final rawLocation = raw['storage_location']?.toString();
+              final storageLocation = StorageLocation.fromString(rawLocation).name;
               final notes = raw['notes']?.toString();
               final isConsumed = (raw['is_consumed'] == true || raw['is_consumed'] == 1) ? 1 : 0;
               final isFavorite = (raw['is_favorite'] == true || raw['is_favorite'] == 1) ? 1 : 0;
@@ -212,6 +218,28 @@ class ProductSyncService {
               ]);
 
               pulled++;
+            }
+          }
+
+          // Clean up local items that were deleted on the remote Admin server
+          // (preserving pending locally created items waiting in sync_queue)
+          final existingRows = await db.query(AppConstants.foodTable, columns: ['id']);
+          final pendingRows = await db.query(
+            AppConstants.syncQueueTable,
+            columns: ['entity_id'],
+            where: "status = 'pending'",
+          );
+          final pendingIds = pendingRows
+              .map((r) => r['entity_id']?.toString())
+              .whereType<String>()
+              .toSet();
+
+          for (final row in existingRows) {
+            final localId = row['id']?.toString();
+            if (localId != null &&
+                !remoteProductIds.contains(localId) &&
+                !pendingIds.contains(localId)) {
+              await db.delete(AppConstants.foodTable, where: 'id = ?', whereArgs: [localId]);
             }
           }
         }

@@ -7,6 +7,9 @@ import '../../../../app/router/route_paths.dart';
 import '../../../../app/theme/color_palette.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/services/app_initializer.dart';
+import '../../../../core/services/product_sync_service.dart';
+import '../../../food_inventory/presentation/providers/food_list_controller.dart';
+import '../../../food_inventory/presentation/providers/food_stats_controller.dart';
 import '../../../settings/presentation/providers/settings_controller.dart';
 
 /// Highly animated, premium Splash Screen for FoodSave / Home Pantry.
@@ -238,6 +241,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       if (mounted) {
         await ref.read(settingsControllerProvider.notifier).loadSettings();
       }
+      // Non-blocking auto-sync on launch: pulls fresh items from admin panel and notifies state
+      unawaited(
+        ProductSyncService.instance.performFullSync().then((_) {
+          if (mounted) {
+            ref.read(foodListControllerProvider.notifier).loadItems();
+            ref.read(foodStatsControllerProvider.notifier).loadStats();
+          }
+        }).catchError((e) {
+          debugPrint('SplashScreen background sync non-fatal note: $e');
+        }),
+      );
     } catch (e) {
       debugPrint('SplashScreen background init note: $e');
     }

@@ -6,6 +6,7 @@ import '../../../../app/theme/color_palette.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../core/widgets/error_state_view.dart';
+import '../../../../core/services/product_sync_service.dart';
 import '../../domain/entities/food_status.dart';
 import '../providers/food_list_controller.dart';
 import '../providers/food_stats_controller.dart';
@@ -65,6 +66,13 @@ class HomeScreen extends ConsumerWidget {
         child: RefreshIndicator(
           color: ColorPalette.freshEmerald,
           onRefresh: () async {
+            try {
+              await ProductSyncService.instance
+                  .performFullSync()
+                  .timeout(const Duration(seconds: 4));
+            } catch (e) {
+              debugPrint('HomeScreen pull-to-refresh sync note: $e');
+            }
             await ref.read(foodListControllerProvider.notifier).loadItems();
             await ref.read(foodStatsControllerProvider.notifier).loadStats();
           },

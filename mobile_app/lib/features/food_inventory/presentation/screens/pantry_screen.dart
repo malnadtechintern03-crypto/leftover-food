@@ -6,9 +6,11 @@ import '../../../../app/theme/color_palette.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
 import '../../../../core/widgets/empty_state_view.dart';
 import '../../../../core/widgets/error_state_view.dart';
+import '../../../../core/services/product_sync_service.dart';
 import '../../domain/entities/food_status.dart';
 import '../../domain/entities/storage_location.dart';
 import '../providers/food_list_controller.dart';
+import '../providers/food_stats_controller.dart';
 import '../widgets/category_filter_list.dart';
 import '../widgets/food_card.dart';
 import '../widgets/food_search_bar.dart';
@@ -67,8 +69,16 @@ class PantryScreen extends ConsumerWidget {
           IconButton(
             icon: const Icon(Icons.refresh_rounded),
             tooltip: 'Reload',
-            onPressed: () {
-              ref.read(foodListControllerProvider.notifier).loadItems();
+            onPressed: () async {
+              try {
+                await ProductSyncService.instance
+                    .performFullSync()
+                    .timeout(const Duration(seconds: 4));
+              } catch (e) {
+                debugPrint('PantryScreen reload sync note: $e');
+              }
+              await ref.read(foodListControllerProvider.notifier).loadItems();
+              await ref.read(foodStatsControllerProvider.notifier).loadStats();
             },
           ),
         ],
@@ -78,7 +88,15 @@ class PantryScreen extends ConsumerWidget {
         child: RefreshIndicator(
           color: ColorPalette.freshEmerald,
           onRefresh: () async {
+            try {
+              await ProductSyncService.instance
+                  .performFullSync()
+                  .timeout(const Duration(seconds: 4));
+            } catch (e) {
+              debugPrint('PantryScreen pull-to-refresh sync note: $e');
+            }
             await ref.read(foodListControllerProvider.notifier).loadItems();
+            await ref.read(foodStatsControllerProvider.notifier).loadStats();
           },
           child: CustomScrollView(
             physics: const AlwaysScrollableScrollPhysics(

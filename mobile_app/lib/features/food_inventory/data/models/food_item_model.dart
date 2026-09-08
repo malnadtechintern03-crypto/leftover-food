@@ -118,7 +118,7 @@ class FoodItemModel extends FoodItem {
       barcode: map['barcode'] as String?,
       category: FoodCategory.fromString(map['category'] as String),
       subcategory: map['subcategory'] as String?,
-      purchaseDate: DateTime.parse(map['purchase_date'] as String),
+      purchaseDate: DateTime.tryParse(map['purchase_date']?.toString() ?? '') ?? DateTime.now(),
       manufacturingDate: parsedMfg,
       expiryDate: parsedExpiry,
       reminderDate: parsedReminder,
@@ -132,8 +132,8 @@ class FoodItemModel extends FoodItem {
       notes: map['notes'] as String?,
       imagePath: map['image_path'] as String?,
       isConsumed: (map['is_consumed'] as int? ?? 0) == 1,
-      createdAt: DateTime.parse(map['created_at'] as String),
-      updatedAt: DateTime.parse(map['updated_at'] as String),
+      createdAt: DateTime.tryParse(map['created_at']?.toString() ?? '') ?? DateTime.now(),
+      updatedAt: DateTime.tryParse(map['updated_at']?.toString() ?? '') ?? DateTime.now(),
       minimumStock: map['minimum_stock'] != null
           ? (map['minimum_stock'] as num).toDouble()
           : null,

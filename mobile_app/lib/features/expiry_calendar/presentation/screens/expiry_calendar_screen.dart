@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_paths.dart';
 import '../../../../app/theme/color_palette.dart';
+import '../../../../core/services/product_sync_service.dart';
 import '../../../../core/widgets/error_state_view.dart';
 import '../providers/expiry_calendar_provider.dart';
 import '../widgets/calendar_day_cell.dart';
@@ -52,7 +53,16 @@ class ExpiryCalendarScreen extends ConsumerWidget {
         data: (_) {
           return RefreshIndicator(
             color: ColorPalette.freshEmerald,
-            onRefresh: () => controller.loadEvents(),
+            onRefresh: () async {
+              try {
+                await ProductSyncService.instance
+                    .performFullSync()
+                    .timeout(const Duration(seconds: 4));
+              } catch (e) {
+                debugPrint('Calendar refresh sync note: $e');
+              }
+              await controller.loadEvents();
+            },
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(
                 parent: BouncingScrollPhysics(),
