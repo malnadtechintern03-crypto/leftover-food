@@ -7,6 +7,9 @@ import '../../../../app/theme/color_palette.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/services/admin_sync_service.dart';
 import '../../../../core/services/product_sync_service.dart';
+import '../../../../core/utils/app_review_helper.dart';
+import '../../../food_inventory/presentation/providers/food_inventory_providers.dart';
+import '../../../food_inventory/presentation/providers/food_list_controller.dart';
 import '../providers/settings_controller.dart';
 import '../widgets/food_tips_sheet.dart';
 
@@ -381,6 +384,148 @@ class SettingsScreen extends ConsumerWidget {
 
               const SizedBox(height: 24),
 
+              // Data & Evaluation Tools
+              _buildSectionHeader(
+                context,
+                'Data & Demo Controls',
+                Icons.storage_rounded,
+              ),
+              const SizedBox(height: 12),
+              _buildCard(
+                context,
+                child: Column(
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: ColorPalette.primaryGreenLight,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Icon(
+                          Icons.playlist_add_check_rounded,
+                          color: ColorPalette.primaryGreenDark,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        'Load Demo Pantry Groceries',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      subtitle: const Text('Populate sample groceries across all 8 categories for testing'),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                      onTap: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Load Demo Groceries?'),
+                            content: const Text(
+                              'This will populate realistic grocery items across all pantry categories. Useful for testing features, recipes, and expiry calendar.',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              FilledButton(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: ColorPalette.primaryGreen,
+                                ),
+                                onPressed: () => Navigator.of(ctx).pop(true),
+                                child: const Text('Load Demo Data'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirmed == true && context.mounted) {
+                          final dataSource = ref.read(foodLocalDataSourceProvider);
+                          await dataSource.seedSampleData();
+                          await ref.read(foodListControllerProvider.notifier).loadItems();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Demo pantry items loaded successfully!'),
+                                backgroundColor: ColorPalette.primaryGreen,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(
+                          Icons.delete_sweep_rounded,
+                          color: Colors.red.shade700,
+                          size: 20,
+                        ),
+                      ),
+                      title: Text(
+                        'Clear Pantry Data',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                      subtitle: const Text('Delete all local grocery items to test clean first-run experience'),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                      onTap: () async {
+                        final confirmed = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Clear All Pantry Records?'),
+                            content: const Text(
+                              'This will permanently delete all local grocery items from your device. Are you sure?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.of(ctx).pop(false),
+                                child: const Text('Cancel'),
+                              ),
+                              FilledButton(
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                ),
+                                onPressed: () => Navigator.of(ctx).pop(true),
+                                child: const Text('Clear All'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirmed == true && context.mounted) {
+                          final dataSource = ref.read(foodLocalDataSourceProvider);
+                          await dataSource.clearAllData();
+                          await ref.read(foodListControllerProvider.notifier).loadItems();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Pantry records cleared. Clean empty state active.'),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
               // App Info
               _buildSectionHeader(context, 'About', Icons.info_outline_rounded),
               const SizedBox(height: 12),
@@ -434,6 +579,42 @@ class SettingsScreen extends ConsumerWidget {
                         color: ColorPalette.primaryGreen,
                         size: 22,
                       ),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(
+                        Icons.star_rate_rounded,
+                        color: Color(0xFFF59E0B),
+                        size: 24,
+                      ),
+                      title: Text(
+                        'Rate Home Pantry',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: const Text('Leave a review on Google Play Store'),
+                      trailing: const Icon(Icons.open_in_new_rounded, size: 16),
+                      onTap: () => AppReviewHelper.openRateApp(context),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: const Icon(
+                        Icons.privacy_tip_outlined,
+                        color: Color(0xFF0284C7),
+                        size: 22,
+                      ),
+                      title: Text(
+                        'Privacy Policy',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: const Text('Read our commitment to on-device privacy'),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                      onTap: () => AppReviewHelper.openPrivacyPolicy(context),
                     ),
                   ],
                 ),
@@ -603,14 +784,17 @@ class _AdminConnectivityCardState extends State<_AdminConnectivityCard> {
     });
 
     try {
-      final syncResult = await ProductSyncService.instance.syncPendingQueue();
+      final syncResult = await ProductSyncService.instance.performFullSync();
       if (!mounted) return;
 
-      final message = syncResult.syncedCount > 0
-          ? 'Successfully synced ${syncResult.syncedCount} item(s) to Admin Backend!'
-          : (syncResult.failedCount > 0
-              ? 'Sync encountered ${syncResult.failedCount} error(s). Backend may be offline.'
-              : 'Sync completed. All records are up to date.');
+      final String message;
+      if (syncResult.syncedCount > 0 || syncResult.pulledCount > 0) {
+        message = 'Synced: ${syncResult.syncedCount} pushed, ${syncResult.pulledCount} pulled from Admin!';
+      } else if (syncResult.failedCount > 0) {
+        message = 'Sync encountered ${syncResult.failedCount} error(s). Backend may be offline.';
+      } else {
+        message = 'Sync completed. All records are up to date.';
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -873,7 +1057,7 @@ class _AdminConnectivityCardState extends State<_AdminConnectivityCard> {
                             ),
                           )
                         : const Icon(Icons.sync_rounded, size: 16),
-                    label: const Text('Sync Queue'),
+                    label: const Text('Full Sync'),
                     style: FilledButton.styleFrom(
                       backgroundColor: ColorPalette.primaryGreen,
                       foregroundColor: Colors.white,

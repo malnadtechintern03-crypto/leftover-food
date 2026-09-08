@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Panel - Global Header Component
+ * ScanSmart Admin Panel - Global Header Component
  */
 
 declare(strict_types=1);
@@ -17,9 +17,9 @@ $currentAdmin = get_logged_in_admin();
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><?= e($pageTitle) ?> — Home Pantry Admin</title>
+  <title><?= e($pageTitle) ?> — ScanSmart Admin</title>
   
-  <!-- Modern Typography & Icons -->
+  <!-- Modern Typography & Material Symbols -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -28,8 +28,11 @@ $currentAdmin = get_logged_in_admin();
   <!-- Bootstrap 5.3 Framework -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <!-- Custom Admin Stylesheet -->
+  <!-- Custom ScanSmart Admin Stylesheet -->
   <link rel="stylesheet" href="<?= base_url('assets/css/admin.css') ?>">
+  <?php if (!empty($extraCss)): ?>
+    <?= $extraCss ?>
+  <?php endif; ?>
 </head>
 <body>
   <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -41,48 +44,7 @@ $currentAdmin = get_logged_in_admin();
     <!-- Main Content Panel -->
     <main class="admin-main">
       <!-- Top Navigation Header -->
-      <header class="admin-topbar">
-        <div class="topbar-left">
-          <button class="btn-sidebar-toggle" id="btnSidebarToggle" aria-label="Toggle navigation">
-            <span class="material-symbols-rounded">menu</span>
-          </button>
-          <h1 class="page-title"><?= e($pageTitle) ?></h1>
-        </div>
-
-        <div class="topbar-right">
-          <!-- Mobile App Connected Badge -->
-          <span class="badge bg-success-subtle text-success border border-success-subtle d-inline-flex align-items-center gap-1 rounded-pill px-3 py-1 fw-semibold" title="Mobile App REST API Active and Connected">
-            <span class="spinner-grow spinner-grow-sm text-success" style="width: 7px; height: 7px;" role="status"></span>
-            <span>📱 Mobile App Sync</span>
-          </span>
-
-          <!-- Quick link to API documentation or view app -->
-          <a href="<?= base_url('api/categories.php') ?>" target="_blank" class="btn btn-sm btn-outline-secondary d-none d-md-inline-flex align-items-center gap-1 rounded-pill px-3">
-            <span class="material-symbols-rounded" style="font-size: 16px;">api</span>
-            <span>REST API</span>
-          </a>
-
-          <div class="dropdown">
-            <button class="btn btn-sm btn-light dropdown-toggle d-flex align-items-center gap-2 rounded-pill px-3 py-1 border" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <span class="admin-avatar" style="width: 26px; height: 26px; font-size: 11px;">
-                <?= strtoupper(substr($currentAdmin['name'] ?? 'A', 0, 1)) ?>
-              </span>
-              <span class="d-none d-sm-inline fw-bold"><?= e($currentAdmin['name'] ?? 'Admin') ?></span>
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-4 mt-2">
-              <li>
-                <div class="px-3 py-2 border-bottom">
-                  <div class="fw-bold small"><?= e($currentAdmin['name'] ?? 'Administrator') ?></div>
-                  <div class="text-muted" style="font-size: 12px;"><?= e($currentAdmin['email'] ?? '') ?></div>
-                </div>
-              </li>
-              <li><a class="dropdown-item py-2 d-flex align-items-center gap-2" href="<?= base_url('settings/index.php') ?>"><span class="material-symbols-rounded fs-6">settings</span>Settings</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item py-2 text-danger d-flex align-items-center gap-2" href="<?= base_url('logout.php') ?>"><span class="material-symbols-rounded fs-6">logout</span>Logout</a></li>
-            </ul>
-          </div>
-        </div>
-      </header>
+      <?php require_once __DIR__ . '/navbar.php'; ?>
 
       <!-- Content Area -->
       <div class="admin-content">

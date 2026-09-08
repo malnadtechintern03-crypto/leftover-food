@@ -121,6 +121,10 @@ require_once __DIR__ . '/../includes/header.php';
     <p class="text-muted small mb-0">Monitor expiration timelines, manage product reminders, and update shelf-life details.</p>
   </div>
   <div class="d-flex gap-2">
+    <a href="<?= base_url('products/create.php') ?>" class="btn btn-primary-custom d-inline-flex align-items-center gap-1">
+      <span class="material-symbols-rounded fs-5">add</span>
+      <span>Add Product</span>
+    </a>
     <a href="<?= base_url('products/export.php?' . http_build_query(['q' => $search, 'category' => $category, 'status' => $status])) ?>" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1">
       <span class="material-symbols-rounded fs-5">download</span>
       <span>Export CSV</span>

@@ -2,8 +2,8 @@
 class AppConstants {
   AppConstants._();
 
-  static const String appName = 'HOME PANTRY';
-  static const String appTagline = 'TRACK & MANAGE';
+  static const String appName = 'Home Pantry';
+  static const String appTagline = 'Smart Food & Expiry Manager';
   static const String appVersion = '1.0.0';
 
   // Database

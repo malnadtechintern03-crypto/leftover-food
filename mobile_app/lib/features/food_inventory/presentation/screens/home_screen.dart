@@ -9,6 +9,7 @@ import '../../../../core/widgets/error_state_view.dart';
 import '../../domain/entities/food_status.dart';
 import '../providers/food_list_controller.dart';
 import '../providers/food_stats_controller.dart';
+import '../widgets/announcement_banner_card.dart';
 import '../widgets/food_card.dart';
 import '../widgets/food_search_bar.dart';
 import '../widgets/food_sort_sheet.dart';
@@ -248,6 +249,11 @@ class HomeScreen extends ConsumerWidget {
                     },
                   ),
                 ),
+              ),
+
+              // Live Admin Broadcast Announcement Banner
+              const SliverToBoxAdapter(
+                child: AnnouncementBannerCard(),
               ),
 
               // 3. Hero Pantry Overview Card

@@ -85,8 +85,12 @@ class AppInitializer {
   Future<void> _initDatabaseAndSeed() async {
     try {
       final dbHelper = DatabaseHelper.instance;
-      final foodDataSource = FoodLocalDataSourceImpl(dbHelper);
-      await foodDataSource.seedSampleData();
+      // In production release builds, new users start with an empty pantry.
+      // Seeding only occurs in debug mode or test environments.
+      if (kDebugMode || Platform.environment.containsKey('FLUTTER_TEST')) {
+        final foodDataSource = FoodLocalDataSourceImpl(dbHelper);
+        await foodDataSource.seedSampleData();
+      }
     } catch (e) {
       debugPrint('Database seed non-fatal warning: $e');
     }

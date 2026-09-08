@@ -6,6 +6,7 @@ import '../../../../app/theme/color_palette.dart';
 import '../../../../core/widgets/empty_state_view.dart';
 import '../../../food_inventory/domain/entities/food_status.dart';
 import '../../../food_inventory/presentation/providers/food_list_controller.dart';
+import '../../../food_inventory/presentation/widgets/announcement_banner_card.dart';
 import '../../../food_inventory/presentation/widgets/food_card.dart';
 import '../providers/settings_controller.dart';
 
@@ -24,18 +25,22 @@ class NotificationsCenterScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'Expiring Alerts',
+          'Alerts & Announcements',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w700,
           ),
         ),
       ),
-      body: listState.items.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(color: ColorPalette.primaryGreen),
-        ),
-        error: (err, _) => Center(child: Text('Error: $err')),
-        data: (allItems) {
+      body: Column(
+        children: [
+          const AnnouncementBannerCard(),
+          Expanded(
+            child: listState.items.when(
+              loading: () => const Center(
+                child: CircularProgressIndicator(color: ColorPalette.primaryGreen),
+              ),
+              error: (err, _) => Center(child: Text('Error: $err')),
+              data: (allItems) {
           final urgentItems = allItems.where((item) {
             final status = item.getStatus(warningDays: warningDays);
             return status == FoodStatus.expiringSoon || status == FoodStatus.expired;
@@ -107,6 +112,9 @@ class NotificationsCenterScreen extends ConsumerWidget {
           );
         },
       ),
+    ),
+  ],
+),
     );
   }
 }

@@ -31,7 +31,7 @@ void main() async {
       overrides: [
         if (prefs != null) sharedPreferencesProvider.overrideWithValue(prefs),
       ],
-      child: const FoodSaveApp(),
+      child: const HomePantryApp(),
     ),
   );
 }

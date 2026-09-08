@@ -5,9 +5,9 @@ import '../features/settings/presentation/providers/settings_controller.dart';
 import 'router/app_router.dart';
 import 'theme/app_theme.dart';
 
-/// Root application widget
-class FoodSaveApp extends ConsumerWidget {
-  const FoodSaveApp({super.key});
+/// Root application widget for Home Pantry
+class HomePantryApp extends ConsumerWidget {
+  const HomePantryApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,3 +24,6 @@ class FoodSaveApp extends ConsumerWidget {
     );
   }
 }
+
+/// Backwards compatibility alias for tests and existing references
+typedef FoodSaveApp = HomePantryApp;

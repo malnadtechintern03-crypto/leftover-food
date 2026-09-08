@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "108459203492",
+    "project_id": "home-pantry-app",
+    "storage_bucket": "home-pantry-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:108459203492:android:9d45e4cb12a02b1f813c90",
+        "android_client_info": {
+          "package_name": "com.homepantry.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "108459203492-debug.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.homepantry.app",
+            "certificate_hash": "d0866f172856948c33a07f1f2943b435f6d70a90"
+          }
+        },
+        {
+          "client_id": "108459203492-release.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.homepantry.app",
+            "certificate_hash": "3586a7cc8714793efd152047d2b8a808d3bff895"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-HomePantryProductionKeyReady"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

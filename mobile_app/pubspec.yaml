@@ -1,5 +1,5 @@
 name: foodsave
-description: "FoodSave - Leftover Food Manager with expiry tracking and waste reduction."
+description: "Home Pantry - Smart Food & Expiry Manager preventing food waste with expiry alerts and recipes."
 publish_to: 'none'
 
 version: 1.0.0+1

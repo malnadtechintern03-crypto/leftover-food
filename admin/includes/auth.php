@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Authentication & Session Security Layer
+ * ScanSmart Admin Authentication & Role-Based Access Control (RBAC)
  */
 
 declare(strict_types=1);
@@ -22,6 +22,10 @@ const SESSION_TIMEOUT_SECONDS = 3600;
 if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
     if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > SESSION_TIMEOUT_SECONDS)) {
         // Session expired
+        $adminId = $_SESSION['admin_id'] ?? null;
+        if ($adminId) {
+            log_admin_activity('Admin Session Expired', 'Session timed out after 60 minutes of inactivity', (int)$adminId);
+        }
         admin_logout();
         header('Location: ' . base_url('login.php?expired=1'));
         exit;
@@ -63,12 +67,63 @@ function require_admin(): void {
 }
 
 /**
+ * Role check helpers
+ */
+function has_role(string ...$allowedRoles): bool {
+    $admin = get_logged_in_admin();
+    if (!$admin) return false;
+    return in_array($admin['role'], $allowedRoles, true);
+}
+
+function require_role(string ...$allowedRoles): void {
+    require_admin();
+    if (!has_role(...$allowedRoles)) {
+        set_flash('error', 'Access denied. You do not have permission to view this resource.');
+        header('Location: ' . base_url('dashboard.php'));
+        exit;
+    }
+}
+
+function can_manage_admins(): bool {
+    return has_role('super_admin');
+}
+
+function can_edit_settings(): bool {
+    return has_role('super_admin');
+}
+
+function can_edit_products(): bool {
+    return has_role('super_admin', 'admin', 'editor');
+}
+
+function can_delete_products(): bool {
+    return has_role('super_admin', 'admin');
+}
+
+function can_edit_categories(): bool {
+    return has_role('super_admin', 'admin', 'editor');
+}
+
+function can_manage_users(): bool {
+    return has_role('super_admin', 'admin');
+}
+
+function can_edit_inventory(): bool {
+    return has_role('super_admin', 'admin', 'editor');
+}
+
+function can_view_reports(): bool {
+    return is_admin_logged_in();
+}
+
+/**
  * Authenticates admin against MySQL database using bcrypt password_verify().
  */
-function admin_login(string $email, string $password): bool {
+function admin_login(string $emailOrUsername, string $password): bool {
     $db = Database::getConnection();
-    $stmt = $db->prepare('SELECT id, name, email, password, role, status FROM admins WHERE email = ? LIMIT 1');
-    $stmt->execute([trim($email)]);
+    $stmt = $db->prepare('SELECT id, name, email, password, role, status FROM admins WHERE email = ? OR name = ? LIMIT 1');
+    $trimmed = trim($emailOrUsername);
+    $stmt->execute([$trimmed, $trimmed]);
     $admin = $stmt->fetch();
 
     if (!$admin) {
@@ -94,6 +149,8 @@ function admin_login(string $email, string $password): bool {
         $updateStmt = $db->prepare('UPDATE admins SET last_login = NOW() WHERE id = ?');
         $updateStmt->execute([$admin['id']]);
 
+        log_admin_activity('Admin Login', 'Administrator logged in successfully', (int)$admin['id']);
+
         return true;
     }
 
@@ -106,6 +163,10 @@ function admin_login(string $email, string $password): bool {
 function admin_logout(): void {
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
+    }
+    $adminId = $_SESSION['admin_id'] ?? null;
+    if ($adminId) {
+        log_admin_activity('Admin Logout', 'Administrator logged out', (int)$adminId);
     }
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {

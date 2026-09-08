@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_paths.dart';
 import '../../../../app/theme/color_palette.dart';
+import '../../../../core/utils/app_review_helper.dart';
 import '../../../../core/utils/data_backup_helper.dart';
 import '../../../../core/utils/data_export_helper.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
@@ -499,6 +500,28 @@ class ProfileScreen extends ConsumerWidget {
             subtitle: 'Theme modes, warning thresholds & units',
             isDark: isDark,
             onTap: () => context.push(RoutePaths.settings),
+          ),
+          const SizedBox(height: 8),
+
+          _buildListTile(
+            context,
+            icon: Icons.star_rate_rounded,
+            title: 'Rate Home Pantry',
+            subtitle: 'Share feedback or rate us on Google Play',
+            iconColor: const Color(0xFFF59E0B),
+            isDark: isDark,
+            onTap: () => AppReviewHelper.openRateApp(context),
+          ),
+          const SizedBox(height: 8),
+
+          _buildListTile(
+            context,
+            icon: Icons.privacy_tip_outlined,
+            title: 'Privacy Policy',
+            subtitle: 'Read our strict offline data privacy policy',
+            iconColor: const Color(0xFF0284C7),
+            isDark: isDark,
+            onTap: () => AppReviewHelper.openPrivacyPolicy(context),
           ),
 
           const SizedBox(height: 22),

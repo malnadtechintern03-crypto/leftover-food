@@ -183,7 +183,7 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="col-md-3">
           <div class="p-3 bg-light rounded-3 border">
             <div class="small text-muted mb-1">Local Host URL</div>
-            <div class="fw-bold text-dark font-monospace small">http://localhost/grocery_admin/</div>
+            <div class="fw-bold text-dark font-monospace small"><?= e(base_url()) ?>/</div>
           </div>
         </div>
 
@@ -204,7 +204,7 @@ require_once __DIR__ . '/../includes/header.php';
         <div class="col-md-3">
           <div class="p-3 bg-light rounded-3 border">
             <div class="small text-muted mb-1">REST API Base</div>
-            <div class="fw-bold text-dark font-monospace small">/api/categories.php</div>
+            <div class="fw-bold text-dark font-monospace small"><?= e(base_url('api/')) ?></div>
           </div>
         </div>
       </div>

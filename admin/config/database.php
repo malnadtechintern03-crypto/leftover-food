@@ -2,6 +2,7 @@
 /**
  * Database Configuration & Connection Class
  * Connects to MySQL using PDO with robust error handling and UTF-8 encoding.
+ * Fully compatible with XAMPP (Localhost) and Cloud Hosting (InfinityFree, cPanel, VPS).
  */
 
 declare(strict_types=1);
@@ -21,11 +22,15 @@ class Database {
      */
     public static function getConnection(): PDO {
         if (self::$instance === null) {
-            $host = getenv('DB_HOST') ?: self::DB_HOST;
-            $port = getenv('DB_PORT') ?: self::DB_PORT;
-            $dbname = getenv('DB_NAME') ?: self::DB_NAME;
-            $user = getenv('DB_USER') ?: self::DB_USER;
-            $pass = getenv('DB_PASS') !== false ? getenv('DB_PASS') : self::DB_PASS;
+            // Check for optional local environment override file (useful on InfinityFree / staging)
+            $envFile = __DIR__ . '/env.php';
+            $env = file_exists($envFile) ? require $envFile : [];
+
+            $host = $env['DB_HOST'] ?? getenv('DB_HOST') ?: self::DB_HOST;
+            $port = $env['DB_PORT'] ?? getenv('DB_PORT') ?: self::DB_PORT;
+            $dbname = $env['DB_NAME'] ?? getenv('DB_NAME') ?: self::DB_NAME;
+            $user = $env['DB_USER'] ?? getenv('DB_USER') ?: self::DB_USER;
+            $pass = $env['DB_PASS'] ?? (getenv('DB_PASS') !== false ? getenv('DB_PASS') : self::DB_PASS);
 
             $dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
             $options = [
@@ -37,17 +42,17 @@ class Database {
             try {
                 self::$instance = new PDO($dsn, $user, $pass, $options);
             } catch (PDOException $e) {
-                // If API request, output JSON error
+                // If API request, output clean JSON error
                 if (str_contains($_SERVER['REQUEST_URI'] ?? '', '/api/')) {
                     header('Content-Type: application/json; charset=utf-8', true, 500);
                     echo json_encode([
                         'status' => 'error',
-                        'message' => 'Database connection failure. Please ensure MySQL is running on localhost.',
+                        'message' => 'Database connection failure. Please ensure MySQL is running.',
                     ]);
                     exit;
                 }
                 
-                die("<!DOCTYPE html><html><head><title>Database Error</title><style>body{font-family:system-ui,-apple-system,sans-serif;padding:40px;background:#f8fafc;color:#1e293b}.card{background:#fff;padding:24px;border-radius:12px;border:1px solid #e2e8f0;max-width:560px;margin:40px auto;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1)}h2{color:#e11d48;margin-top:0}</style></head><body><div class='card'><h2>Database Connection Failed</h2><p>Could not connect to MySQL database <strong>{$dbname}</strong> on <strong>{$host}</strong>.</p><p>Please make sure MySQL is started in XAMPP Control Panel and database is imported.</p><code>" . htmlspecialchars($e->getMessage()) . "</code></div></body></html>");
+                die("<!DOCTYPE html><html><head><title>ScanSmart — Database Error</title><style>body{font-family:system-ui,-apple-system,sans-serif;padding:40px;background:#f8fafc;color:#1e293b}.card{background:#fff;padding:28px;border-radius:14px;border:1px solid #e2e8f0;max-width:600px;margin:40px auto;box-shadow:0 10px 25px -5px rgba(0,0,0,0.08)}h2{color:#e11d48;margin-top:0}code{background:#f1f5f9;padding:6px 10px;border-radius:6px;display:block;margin-top:12px;word-break:break-all}</style></head><body><div class='card'><h2>Database Connection Failed</h2><p>Could not connect to MySQL database <strong>{$dbname}</strong> on host <strong>{$host}</strong>.</p><p><strong>Localhost:</strong> Ensure MySQL is started in XAMPP Control Panel.</p><p><strong>InfinityFree:</strong> Verify database hostname, username, and password in <code>admin/config/database.php</code> or <code>admin/config/env.php</code>.</p><code>" . htmlspecialchars($e->getMessage()) . "</code></div></body></html>");
             }
         }
 

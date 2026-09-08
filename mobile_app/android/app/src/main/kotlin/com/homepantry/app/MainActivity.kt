@@ -1,4 +1,4 @@
-package com.example.foodsave
+package com.homepantry.app
 
 import io.flutter.embedding.android.FlutterActivity
 

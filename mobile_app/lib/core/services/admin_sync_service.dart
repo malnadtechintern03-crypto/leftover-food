@@ -28,6 +28,9 @@ class AdminSyncService {
     'http://localhost/admin',
     'http://127.0.0.1/admin',
     'http://10.0.2.2/admin',
+    'http://localhost/leftover/admin',
+    'http://127.0.0.1/leftover/admin',
+    'http://10.0.2.2/leftover/admin',
     'http://localhost/leftover-food/admin',
     'http://127.0.0.1/leftover-food/admin',
     'http://10.0.2.2/leftover-food/admin',
@@ -69,9 +72,9 @@ class AdminSyncService {
 
     for (final candidate in _candidateBaseUrls) {
       try {
-        final uri = Uri.parse('$candidate/api/categories.php');
-        final request = await client.getUrl(uri).timeout(const Duration(seconds: 2));
-        final response = await request.close().timeout(const Duration(seconds: 2));
+        final statusUri = Uri.parse('$candidate/api/status.php');
+        final request = await client.getUrl(statusUri).timeout(const Duration(seconds: 1));
+        final response = await request.close().timeout(const Duration(seconds: 1));
         if (response.statusCode == 200) {
           _resolvedBaseUrl = candidate;
           client.close();
@@ -79,7 +82,17 @@ class AdminSyncService {
           return candidate;
         }
       } catch (_) {
-        // Try next candidate
+        try {
+          final uri = Uri.parse('$candidate/api/categories.php');
+          final request = await client.getUrl(uri).timeout(const Duration(seconds: 1));
+          final response = await request.close().timeout(const Duration(seconds: 1));
+          if (response.statusCode == 200) {
+            _resolvedBaseUrl = candidate;
+            client.close();
+            debugPrint('AdminSyncService: Connected to active endpoint $_resolvedBaseUrl');
+            return candidate;
+          }
+        } catch (_) {}
       }
     }
     client.close();
@@ -102,9 +115,18 @@ class AdminSyncService {
     try {
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 3);
-      final uri = Uri.parse('$targetUrl/api/categories.php');
-      final request = await client.getUrl(uri).timeout(const Duration(seconds: 3));
-      final response = await request.close().timeout(const Duration(seconds: 3));
+      
+      // Try status.php first, fallback to categories.php
+      Uri uri = Uri.parse('$targetUrl/api/status.php');
+      var request = await client.getUrl(uri).timeout(const Duration(seconds: 2));
+      var response = await request.close().timeout(const Duration(seconds: 2));
+      
+      if (response.statusCode != 200) {
+        uri = Uri.parse('$targetUrl/api/categories.php');
+        request = await client.getUrl(uri).timeout(const Duration(seconds: 2));
+        response = await request.close().timeout(const Duration(seconds: 2));
+      }
+      
       stopwatch.stop();
       client.close();
 
