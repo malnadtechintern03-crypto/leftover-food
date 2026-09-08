@@ -826,7 +826,7 @@ class _AdminConnectivityCardState extends State<_AdminConnectivityCard> {
   }
 
   void _showConfigureUrlDialog() {
-    final controller = TextEditingController(text: _currentUrl ?? 'http://localhost:8000');
+    final controller = TextEditingController(text: _currentUrl ?? 'http://192.168.31.187/leftover/admin');
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     showDialog(
@@ -841,9 +841,10 @@ class _AdminConnectivityCardState extends State<_AdminConnectivityCard> {
           children: [
             const Text(
               'Set the host URL for the PHP Admin backend REST API. Examples:\n'
-              '• http://localhost:8000 (Desktop / Local)\n'
-              '• http://10.0.2.2:8000 (Android Emulator)\n'
-              '• http://192.168.x.x:8000 (Physical Phone on Wi-Fi)',
+              '• http://192.168.31.187/leftover/admin (Wi-Fi / Mobile)\n'
+              '• http://192.168.31.187:8000 (PHP Built-in Server)\n'
+              '• http://localhost:8000 (Desktop / Localhost)\n'
+              '• http://10.0.2.2:8000 (Android Emulator)',
               style: TextStyle(fontSize: 12),
             ),
             const SizedBox(height: 14),
@@ -851,7 +852,7 @@ class _AdminConnectivityCardState extends State<_AdminConnectivityCard> {
               controller: controller,
               decoration: InputDecoration(
                 labelText: 'Server URL',
-                hintText: 'http://localhost:8000',
+                hintText: 'http://192.168.31.187/leftover/admin',
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               ),
             ),
@@ -934,7 +935,7 @@ class _AdminConnectivityCardState extends State<_AdminConnectivityCard> {
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        _currentUrl ?? 'Auto-detecting (localhost:8000 / 10.0.2.2)',
+                        _currentUrl ?? 'Auto-detecting (192.168.31.187 / localhost:8000)',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: isDark
                               ? ColorPalette.darkTextSecondary

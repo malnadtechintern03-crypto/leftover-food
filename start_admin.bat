@@ -30,6 +30,8 @@ echo [OK] Using PHP: %PHP_BIN%
 echo [INFO] Document Root: admin/
 echo [INFO] Local Web Admin:       http://localhost:8000
 echo [INFO] Mobile REST API:       http://localhost:8000/api/
+echo [INFO] Wi-Fi Mobile App API:  http://192.168.31.187:8000/api/
+echo [INFO] XAMPP Apache API:      http://192.168.31.187/leftover/admin/api/
 echo [INFO] Android Emulator API:  http://10.0.2.2:8000/api/
 echo.
 :: Check if MySQL is running on port 3306

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../constants/app_constants.dart';
@@ -24,7 +23,7 @@ class ProductSyncService {
   ProductSyncService._();
   static final ProductSyncService instance = ProductSyncService._();
 
-  String _baseUrl = 'http://localhost:8000/api';
+  String _baseUrl = 'http://192.168.31.187/leftover/admin/api';
 
   String get baseUrl => _baseUrl;
 
@@ -32,12 +31,9 @@ class ProductSyncService {
     _baseUrl = url.replaceAll(RegExp(r'/+$'), '');
   }
 
-  /// Resolve appropriate default host for Android emulator vs desktop/web
+  /// Resolve appropriate default host for local network / physical devices
   String getDefaultBaseUrl() {
-    if (!kIsWeb && Platform.isAndroid) {
-      return 'http://10.0.2.2:8000/api';
-    }
-    return 'http://localhost:8000/api';
+    return 'http://192.168.31.187/leftover/admin/api';
   }
 
   /// Process all pending records in SQLite sync_queue table (Push to Admin)

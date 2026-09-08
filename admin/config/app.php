@@ -13,6 +13,8 @@ return [
     'default_currency' => '₹',
     'default_reminder_days' => 7,
     'pagination_limit' => 20,
+    'server_ip' => '192.168.31.187',
+    'api_url' => 'http://192.168.31.187/leftover/admin/api',
     'upload' => [
         'directory' => __DIR__ . '/../uploads/products/',
         'url' => 'uploads/products/',

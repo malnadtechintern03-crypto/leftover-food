@@ -22,10 +22,14 @@ try {
     
     $elapsedMs = round((microtime(true) - $startTime) * 1000, 2);
 
+    $serverIp = function_exists('get_app_setting') ? get_app_setting('server_ip', '192.168.31.187') : '192.168.31.187';
+
     echo json_encode([
         'status' => 'success',
         'app_name' => 'Home Pantry',
         'api_version' => '1.0.0',
+        'server_ip' => $serverIp,
+        'mobile_api_url' => 'http://' . $serverIp . '/leftover/admin/api',
         'db_connected' => true,
         'server_time' => date('c'),
         'latency_ms' => $elapsedMs,

@@ -366,5 +366,6 @@ INSERT INTO `app_settings` (`id`, `setting_key`, `setting_value`, `description`)
 (7, 'default_product_status', 'Active', 'Default status for newly scanned products'),
 (8, 'pagination_limit', '20', 'Items displayed per page in admin tables'),
 (9, 'max_upload_mb', '5', 'Maximum image upload size in MB'),
-(10, 'maintenance_mode', '0', 'System maintenance mode toggle (0=Off, 1=On)')
+(10, 'maintenance_mode', '0', 'System maintenance mode toggle (0=Off, 1=On)'),
+(11, 'server_ip', '192.168.31.187', 'Local Wi-Fi network IP address for mobile app sync')
 ON DUPLICATE KEY UPDATE `setting_value` = VALUES(`setting_value`);

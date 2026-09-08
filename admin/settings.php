@@ -26,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $paginationLimit = max(5, min(100, (int)($_POST['pagination_limit'] ?? 20)));
         $maxUploadMb = max(1, min(50, (int)($_POST['max_upload_mb'] ?? 5)));
         $maintenanceMode = isset($_POST['maintenance_mode']) ? '1' : '0';
+        $serverIp = trim($_POST['server_ip'] ?? '192.168.31.187');
 
         set_app_setting('app_name', $appName, 'Display name of application');
         set_app_setting('app_tagline', $appTagline, 'Application brand tagline');
@@ -37,6 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         set_app_setting('pagination_limit', (string)$paginationLimit, 'Items displayed per page in admin tables');
         set_app_setting('max_upload_mb', (string)$maxUploadMb, 'Maximum image upload size in MB');
         set_app_setting('maintenance_mode', $maintenanceMode, 'System maintenance mode toggle');
+        set_app_setting('server_ip', $serverIp, 'Local Wi-Fi network IP address for mobile app sync');
 
         log_admin_activity('Update Settings', 'Updated global application settings & system configuration');
         set_flash('success', 'Application settings have been updated successfully.');
@@ -56,6 +58,7 @@ $defaultStatus = get_app_setting('default_product_status', 'Active');
 $paginationLimit = (int)get_app_setting('pagination_limit', '20');
 $maxUploadMb = (int)get_app_setting('max_upload_mb', '5');
 $maintenanceMode = get_app_setting('maintenance_mode', '0') === '1';
+$serverIp = get_app_setting('server_ip', '192.168.31.187');
 
 $pageTitle = 'Application Settings';
 require_once __DIR__ . '/includes/header.php';
@@ -171,6 +174,31 @@ require_once __DIR__ . '/includes/header.php';
           </div>
         </div>
 
+        <!-- 4. Network & Mobile App IP -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+          <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+            <span class="material-symbols-rounded text-success">wifi</span>
+            <span>Local Network & Mobile App Connectivity</span>
+          </h5>
+
+          <div class="mb-3">
+            <label for="server_ip" class="form-label small fw-bold">Server IPv4 Address (Wi-Fi / LAN)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light text-muted"><span class="material-symbols-rounded fs-6">lan</span></span>
+              <input type="text" name="server_ip" id="server_ip" class="form-control font-monospace" value="<?= e($serverIp) ?>" placeholder="192.168.31.187" required>
+            </div>
+            <div class="form-text" style="font-size: 11px;">
+              Used by mobile phones on your local Wi-Fi to sync with this Admin Panel.
+            </div>
+          </div>
+
+          <div class="p-3 bg-light rounded-3 border">
+            <div class="small fw-bold text-dark mb-1">Active Mobile Endpoints:</div>
+            <div class="small text-muted mb-1">• XAMPP Apache: <code class="text-primary font-monospace">http://<?= e($serverIp) ?>/leftover/admin/api</code></div>
+            <div class="small text-muted">• PHP Server: <code class="text-primary font-monospace">http://<?= e($serverIp) ?>:8000/api</code></div>
+          </div>
+        </div>
+
         <button type="submit" class="btn btn-primary rounded-pill px-5 py-2.5 fw-bold d-inline-flex align-items-center gap-2" style="background-color: #10B981; border-color: #10B981;">
           <span class="material-symbols-rounded">save</span>
           <span>Save Configuration</span>
@@ -187,18 +215,23 @@ require_once __DIR__ . '/includes/header.php';
 
           <div class="small">
             <div class="py-2 border-bottom">
-              <div class="text-muted">Base URL (Localhost):</div>
-              <code class="d-block text-break mt-1 bg-light p-1.5 rounded"><?= base_url('api') ?></code>
+              <div class="text-muted">Network Server IP:</div>
+              <code class="d-block text-break mt-1 bg-light p-1.5 rounded fw-bold text-success"><?= e($serverIp) ?></code>
+            </div>
+
+            <div class="py-2 border-bottom">
+              <div class="text-muted">Mobile REST API (Wi-Fi):</div>
+              <code class="d-block text-break mt-1 bg-light p-1.5 rounded">http://<?= e($serverIp) ?>/leftover/admin/api</code>
             </div>
 
             <div class="py-2 border-bottom">
               <div class="text-muted">Health Ping Endpoint:</div>
-              <code class="d-block text-break mt-1 bg-light p-1.5 rounded"><?= base_url('api/status.php') ?></code>
+              <code class="d-block text-break mt-1 bg-light p-1.5 rounded">http://<?= e($serverIp) ?>/leftover/admin/api/status.php</code>
             </div>
 
             <div class="py-2 border-bottom">
-              <div class="text-muted">Catalog Products Endpoint:</div>
-              <code class="d-block text-break mt-1 bg-light p-1.5 rounded"><?= base_url('api/products.php') ?></code>
+              <div class="text-muted">Localhost Base URL:</div>
+              <code class="d-block text-break mt-1 bg-light p-1.5 rounded"><?= base_url('api') ?></code>
             </div>
 
             <div class="py-2 border-bottom">

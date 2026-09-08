@@ -45,4 +45,8 @@ class AppConstants {
   static const double defaultMonthlyBudget = 5000.0;
   static const double defaultMonthlyBudgetINR = 5000.0;
   static const String defaultCurrencySymbol = '₹';
+
+  // Server & Admin Sync
+  static const String defaultServerIp = '192.168.31.187';
+  static const String defaultAdminBaseUrl = 'http://192.168.31.187/leftover/admin';
 }

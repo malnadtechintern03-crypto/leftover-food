@@ -17,30 +17,28 @@ class AdminSyncService {
   // - 192.168.31.187 for local Wi-Fi development
   // - localhost/127.0.0.1 for desktop/web
   // Candidate base URLs to auto-detect localhost depending on execution environment:
-  // - localhost:8000 / 127.0.0.1:8000 for zero-config PHP built-in server (run_admin.bat)
-  // - 10.0.2.2:8000 / 10.0.2.2/admin for Android emulator
-  // - localhost/admin, localhost/leftover-food/admin for Apache/XAMPP
-  // - 192.168.31.187 for local Wi-Fi development
+  // - 192.168.31.187 for local Wi-Fi development & physical devices
+  // - localhost / 127.0.0.1 for desktop/web
+  // - 10.0.2.2 for Android emulator
   static final List<String> _candidateBaseUrls = [
+    'http://192.168.31.187/leftover/admin',
+    'http://192.168.31.187:8000',
+    'http://192.168.31.187/admin',
+    'http://192.168.31.187/leftover-food/admin',
+    'http://localhost/leftover/admin',
+    'http://127.0.0.1/leftover/admin',
+    'http://10.0.2.2/leftover/admin',
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'http://10.0.2.2:8000',
     'http://localhost/admin',
     'http://127.0.0.1/admin',
     'http://10.0.2.2/admin',
-    'http://localhost/leftover/admin',
-    'http://127.0.0.1/leftover/admin',
-    'http://10.0.2.2/leftover/admin',
     'http://localhost/leftover-food/admin',
     'http://127.0.0.1/leftover-food/admin',
     'http://10.0.2.2/leftover-food/admin',
     'http://127.0.0.1:8080/admin',
     'http://localhost:8080/admin',
-    'http://192.168.31.187/admin',
-    'http://10.0.2.2/grocery_admin',
-    'http://localhost/grocery_admin',
-    'http://localhost/backend',
-    'http://10.0.2.2/backend',
   ];
 
   static String? _resolvedBaseUrl;
