@@ -366,15 +366,19 @@ class _AddEditFoodScreenState extends ConsumerState<AddEditFoodScreen> {
                       ),
                     ),
                     const SizedBox(width: 10),
-                    Text(
-                      formState.barcode != null && formState.barcode!.isNotEmpty
-                          ? 'Barcode: ${formState.barcode} (Tap to Rescan)'
-                          : '📷 Scan Barcode',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: isDark ? ColorPalette.freshEmerald : ColorPalette.freshEmeraldDark,
-                        letterSpacing: -0.2,
+                    Flexible(
+                      child: Text(
+                        formState.barcode != null && formState.barcode!.isNotEmpty
+                            ? 'Barcode: ${formState.barcode} (Tap to Rescan)'
+                            : '📷 Scan Barcode',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? ColorPalette.freshEmerald : ColorPalette.freshEmeraldDark,
+                          letterSpacing: -0.2,
+                        ),
                       ),
                     ),
                   ],
@@ -939,6 +943,8 @@ class _AddEditFoodScreenState extends ConsumerState<AddEditFoodScreen> {
                                 value: unit,
                                 child: Text(
                                   '${unit.displayName} (${unit.abbreviation})',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                                 ),
                               );
@@ -1047,12 +1053,16 @@ class _AddEditFoodScreenState extends ConsumerState<AddEditFoodScreen> {
                     const Divider(height: 1),
                     Padding(
                       padding: const EdgeInsets.all(12),
-                      child: Row(
+                      child: Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
                           const Text('Frequency: ', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                          const Spacer(),
                           Wrap(
                             spacing: 6,
+                            runSpacing: 4,
                             children: [7, 14, 30, 45].map((days) {
                               final isSelected = formState.recurringIntervalDays == days;
                               return ChoiceChip(
@@ -1096,14 +1106,41 @@ class _AddEditFoodScreenState extends ConsumerState<AddEditFoodScreen> {
               icon: formState.isEditing ? Icons.check_rounded : Icons.save_rounded,
               isLoading: formState.isSubmitting,
               onPressed: () async {
+                // Ensure latest controller values are synchronized into state before submitting
+                notifier.setName(_nameController.text);
+                if (_brandController.text.trim().isNotEmpty) {
+                  notifier.setBrand(_brandController.text.trim());
+                }
+                if (_subcategoryController.text.trim().isNotEmpty) {
+                  notifier.setSubcategory(_subcategoryController.text.trim());
+                }
+                if (_notesController.text.trim().isNotEmpty) {
+                  notifier.setNotes(_notesController.text.trim());
+                }
+                final q = double.tryParse(_quantityController.text.trim());
+                if (q != null && q > 0) {
+                  notifier.setQuantity(q);
+                }
+                final p = double.tryParse(_priceController.text.trim());
+                if (p != null) {
+                  notifier.setPrice(p);
+                }
+                final m = double.tryParse(_minStockController.text.trim());
+                if (m != null) {
+                  notifier.setMinimumStock(m);
+                }
+
                 final success = await notifier.submit();
                 if (success && context.mounted) {
+                  final savedName = _nameController.text.trim().isNotEmpty
+                      ? _nameController.text.trim()
+                      : formState.name;
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(
                         formState.isEditing
-                            ? 'Updated ${formState.name}!'
-                            : 'Added ${formState.name} to grocery pantry!',
+                            ? 'Updated $savedName!'
+                            : 'Added $savedName to grocery pantry!',
                       ),
                       backgroundColor: ColorPalette.freshEmeraldDark,
                       behavior: SnackBarBehavior.floating,
@@ -1154,16 +1191,20 @@ class _AddEditFoodScreenState extends ConsumerState<AddEditFoodScreen> {
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Center(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                  color: isSelected
-                      ? ColorPalette.warningAmber
-                      : (isDark
-                          ? ColorPalette.darkTextSecondary
-                          : ColorPalette.lightTextSecondary),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                    color: isSelected
+                        ? ColorPalette.warningAmber
+                        : (isDark
+                            ? ColorPalette.darkTextSecondary
+                            : ColorPalette.lightTextSecondary),
+                  ),
                 ),
               ),
             ),

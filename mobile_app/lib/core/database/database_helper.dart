@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart' hide DatabaseException;
 import 'package:sqflite_common_ffi/sqflite_ffi.dart' as ffi;
 import '../constants/app_constants.dart';
@@ -50,7 +51,12 @@ class DatabaseHelper {
         final dbFolder = await getDatabasesPath();
         dbPath = join(dbFolder, filePath);
       } catch (_) {
-        dbPath = filePath;
+        try {
+          final docDir = await getApplicationDocumentsDirectory();
+          dbPath = join(docDir.path, filePath);
+        } catch (_) {
+          dbPath = filePath;
+        }
       }
 
       return await openDatabase(
@@ -206,7 +212,10 @@ class DatabaseHelper {
         entity_type TEXT NOT NULL,
         entity_id TEXT NOT NULL,
         payload TEXT NOT NULL,
-        created_at TEXT NOT NULL
+        created_at TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        retry_count INTEGER NOT NULL DEFAULT 0,
+        last_error TEXT
       )
     ''');
   }
@@ -312,9 +321,19 @@ class DatabaseHelper {
           entity_type TEXT NOT NULL,
           entity_id TEXT NOT NULL,
           payload TEXT NOT NULL,
-          created_at TEXT NOT NULL
+          created_at TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'pending',
+          retry_count INTEGER NOT NULL DEFAULT 0,
+          last_error TEXT
         )
       ''');
+    }
+
+    if (oldVersion < 5) {
+      await _safelyAddColumn(db, AppConstants.syncQueueTable, 'status', "TEXT NOT NULL DEFAULT 'pending'");
+      await _safelyAddColumn(db, AppConstants.syncQueueTable, 'retry_count', 'INTEGER NOT NULL DEFAULT 0');
+      await _safelyAddColumn(db, AppConstants.syncQueueTable, 'last_error', 'TEXT');
+      await _safelyAddColumn(db, AppConstants.remindersTable, 'is_enabled', 'INTEGER NOT NULL DEFAULT 1');
     }
   }
 
@@ -335,6 +354,14 @@ class DatabaseHelper {
     try {
       await db.execute('PRAGMA journal_mode = WAL;');
       await db.execute('PRAGMA synchronous = NORMAL;');
+    } catch (_) {}
+
+    // Self-healing schema validation: ensure all required columns exist across any install or upgrade state
+    try {
+      await _safelyAddColumn(db, AppConstants.syncQueueTable, 'status', "TEXT NOT NULL DEFAULT 'pending'");
+      await _safelyAddColumn(db, AppConstants.syncQueueTable, 'retry_count', 'INTEGER NOT NULL DEFAULT 0');
+      await _safelyAddColumn(db, AppConstants.syncQueueTable, 'last_error', 'TEXT');
+      await _safelyAddColumn(db, AppConstants.remindersTable, 'is_enabled', 'INTEGER NOT NULL DEFAULT 1');
     } catch (_) {}
   }
 

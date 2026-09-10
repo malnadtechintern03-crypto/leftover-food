@@ -301,27 +301,34 @@ class GroceryAnalyticsScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: progressColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(10),
+              Expanded(
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: progressColor.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Icon(Icons.account_balance_wallet_rounded, color: progressColor, size: 20),
                     ),
-                    child: Icon(Icons.account_balance_wallet_rounded, color: progressColor, size: 20),
-                  ),
-                  const SizedBox(width: 10),
-                  Text(
-                    'Monthly Grocery Budget',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Monthly Grocery Budget',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: 6),
               IconButton(
                 icon: const Icon(Icons.edit_rounded, size: 18),
                 tooltip: 'Edit monthly limit',
@@ -337,48 +344,61 @@ class GroceryAnalyticsScreen extends ConsumerWidget {
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Spent this Month',
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Spent this Month',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '₹${budget.totalSpentThisMonth.toStringAsFixed(0)}',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: -0.5,
-                      color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                    const SizedBox(height: 2),
+                    Text(
+                      '₹${budget.totalSpentThisMonth.toStringAsFixed(0)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: -0.5,
+                        color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    isDanger ? 'Over Budget by' : 'Remaining',
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: isDanger ? ColorPalette.expiredRed : (isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary),
+              const SizedBox(width: 12),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      isDanger ? 'Over Budget by' : 'Remaining',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: isDanger ? ColorPalette.expiredRed : (isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '₹${isDanger ? (budget.totalSpentThisMonth - budget.monthlyLimit).toStringAsFixed(0) : budget.remainingBudget.toStringAsFixed(0)}',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: progressColor,
+                    const SizedBox(height: 2),
+                    Text(
+                      '₹${isDanger ? (budget.totalSpentThisMonth - budget.monthlyLimit).toStringAsFixed(0) : budget.remainingBudget.toStringAsFixed(0)}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: progressColor,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),

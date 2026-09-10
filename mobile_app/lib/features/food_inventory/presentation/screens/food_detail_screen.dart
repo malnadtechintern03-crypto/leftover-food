@@ -141,79 +141,88 @@ class FoodDetailScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Status Badge & Category & Storage Location
-                      Row(
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
                           ExpiryCountdownBadge(
                             expiryDate: item.expiryDate,
                             status: status,
                           ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: item.category.color.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(item.category.icon,
-                                    size: 13, color: item.category.color),
-                                const SizedBox(width: 5),
-                                Text(
-                                  item.category.label,
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: item.category.color,
-                                  ),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: item.category.color.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(16),
                                 ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: item.storageLocation.color.withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(item.storageLocation.icon,
-                                    size: 13, color: item.storageLocation.color),
-                                const SizedBox(width: 5),
-                                Text(
-                                  item.storageLocation.label,
-                                  style: TextStyle(
-                                    fontSize: 11.5,
-                                    fontWeight: FontWeight.w700,
-                                    color: item.storageLocation.color,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (item.subcategory != null && item.subcategory!.isNotEmpty) ...[
-                            const SizedBox(width: 6),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 10, vertical: 5),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFF0284C7).withValues(alpha: 0.12),
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                item.subcategory!,
-                                style: const TextStyle(
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF0284C7),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(item.category.icon,
+                                        size: 13, color: item.category.color),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      item.category.label,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: item.category.color,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ),
-                          ],
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 5),
+                                decoration: BoxDecoration(
+                                  color: item.storageLocation.color.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(item.storageLocation.icon,
+                                        size: 13, color: item.storageLocation.color),
+                                    const SizedBox(width: 5),
+                                    Text(
+                                      item.storageLocation.label,
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: item.storageLocation.color,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (item.subcategory != null && item.subcategory!.isNotEmpty)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF0284C7).withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                  child: Text(
+                                    item.subcategory!,
+                                    style: const TextStyle(
+                                      fontSize: 11.5,
+                                      fontWeight: FontWeight.w700,
+                                      color: Color(0xFF0284C7),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ],
                       ),
 
@@ -331,27 +340,31 @@ class FoodDetailScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Remaining Quantity',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: isDark
-                                            ? ColorPalette.darkTextSecondary
-                                            : ColorPalette.lightTextSecondary,
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        'Remaining Quantity',
+                                        style: theme.textTheme.bodySmall?.copyWith(
+                                          color: isDark
+                                              ? ColorPalette.darkTextSecondary
+                                              : ColorPalette.lightTextSecondary,
+                                        ),
                                       ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '${item.remainingQuantity.toStringAsFixed(item.remainingQuantity.truncateToDouble() == item.remainingQuantity ? 0 : 1)} ${item.unit.displayName}',
-                                      style:
-                                          theme.textTheme.titleLarge?.copyWith(
-                                        fontWeight: FontWeight.w800,
-                                        color: ColorPalette.freshEmerald,
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${item.remainingQuantity.toStringAsFixed(item.remainingQuantity.truncateToDouble() == item.remainingQuantity ? 0 : 1)} ${item.unit.displayName}',
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style:
+                                            theme.textTheme.titleLarge?.copyWith(
+                                          fontWeight: FontWeight.w800,
+                                          color: ColorPalette.freshEmerald,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                                 if (!item.isConsumed)
                                   AppButton(

@@ -95,7 +95,7 @@ class UrgentExpiringCarousel extends StatelessWidget {
 
         // Horizontal List of Food Cards
         SizedBox(
-          height: 178,
+          height: 192,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -182,7 +182,7 @@ class UrgentExpiringCarousel extends StatelessWidget {
                       : ColorPalette.lightTextSecondary,
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 6),
 
               // Expiry Label Tag (Red/coral for urgency)
               Text(

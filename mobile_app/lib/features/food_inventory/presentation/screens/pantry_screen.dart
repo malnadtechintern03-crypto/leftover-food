@@ -475,12 +475,16 @@ class PantryScreen extends ConsumerWidget {
                     children: [
                       const Icon(Icons.add_circle_outline_rounded, color: ColorPalette.freshEmerald, size: 22),
                       const SizedBox(width: 8),
-                      Text(
-                        'Add Grocery to Inventory',
-                        style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w900,
-                          color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                      Expanded(
+                        child: Text(
+                          'Add Grocery to Inventory',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w900,
+                            color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                          ),
                         ),
                       ),
                     ],

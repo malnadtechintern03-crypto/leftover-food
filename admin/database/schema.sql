@@ -220,3 +220,27 @@ INSERT INTO `products` (`id`, `user_id`, `name`, `brand`, `barcode`, `image_path
 ('prod-6', 'default_user', 'Organic Green Tea Bags', 'Twinings', '070177154210', 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=400&q=80', 'Beverages', 'Tea', 25.00, 'pieces', 240.00, CURDATE() - INTERVAL 20 DAY, CURDATE() - INTERVAL 40 DAY, CURDATE() + INTERVAL 25 DAY, CURDATE() + INTERVAL 18 DAY, 1, '7', 'Safe', 'kitchenCabinet', 'Pure green tea with jasmine aroma.', 0)
 ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
 
+-- 9. Mobile Application Registered Users Table
+CREATE TABLE IF NOT EXISTS `users` (
+    `id` VARCHAR(64) PRIMARY KEY,
+    `name` VARCHAR(150) NOT NULL,
+    `email` VARCHAR(150) NOT NULL UNIQUE,
+    `password` VARCHAR(255) NULL,
+    `role` VARCHAR(50) NOT NULL DEFAULT 'user',
+    `status` ENUM('active', 'inactive', 'banned') NOT NULL DEFAULT 'active',
+    `products_count` INT NOT NULL DEFAULT 0,
+    `scans_count` INT NOT NULL DEFAULT 0,
+    `last_login` DATETIME NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX `idx_users_email` (`email`),
+    INDEX `idx_users_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Initial Demo Mobile User Account
+-- Password: user123 (bcrypt hash)
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `status`) VALUES
+('user_demo_chef', 'Demo Chef', 'user@homepantry.com', '$2y$10$58b4gykjOgGF6SonPADYWuyYWy1/QLfZVEHyilLu5HIJnwAtza62m', 'user', 'active')
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`);
+
+

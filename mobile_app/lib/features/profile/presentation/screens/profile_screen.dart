@@ -8,6 +8,8 @@ import '../../../../core/utils/app_review_helper.dart';
 import '../../../../core/utils/data_backup_helper.dart';
 import '../../../../core/utils/data_export_helper.dart';
 import '../../../../core/widgets/confirmation_dialog.dart';
+import '../../../auth/domain/entities/user.dart';
+import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../food_inventory/presentation/providers/food_list_controller.dart';
 import '../../../food_inventory/presentation/providers/food_stats_controller.dart';
 import '../../../settings/presentation/widgets/food_tips_sheet.dart';
@@ -16,6 +18,363 @@ import '../../../shopping_list/presentation/providers/shopping_list_controller.d
 /// Kitchen Profile Screen with User Info, Pantry Statistics, Preferences, Data Management, Backup & Restore
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
+
+  void _showEditProfileSheet(BuildContext context, WidgetRef ref, User? user) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final nameController = TextEditingController(text: user?.name ?? 'Guest Chef');
+    final emailController = TextEditingController(text: user?.email ?? 'guest@homepantry.local');
+    final isGuest = user?.isGuest ?? false;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (bottomSheetContext) {
+        return StatefulBuilder(
+          builder: (sheetContext, setSheetState) {
+            final bottomInset = MediaQuery.of(sheetContext).viewInsets.bottom;
+            final currentName = nameController.text.trim();
+            final parts = currentName.split(RegExp(r'\s+'));
+            String previewInitials = 'CK';
+            if (parts.isNotEmpty && parts[0].isNotEmpty) {
+              if (parts.length == 1) {
+                previewInitials = parts[0].substring(0, parts[0].length >= 2 ? 2 : 1).toUpperCase();
+              } else {
+                final first = parts[0][0];
+                final second = parts[1].isNotEmpty ? parts[1][0] : '';
+                previewInitials = '$first$second'.toUpperCase();
+              }
+            }
+
+            return Container(
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 20 + bottomInset),
+              decoration: BoxDecoration(
+                color: isDark ? ColorPalette.darkCard : ColorPalette.lightCard,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, -4),
+                  ),
+                ],
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Drag Handle
+                    Center(
+                      child: Container(
+                        width: 44,
+                        height: 4.5,
+                        decoration: BoxDecoration(
+                          color: isDark ? Colors.white24 : Colors.black12,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Header
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: ColorPalette.freshEmerald.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.edit_note_rounded,
+                            color: ColorPalette.freshEmerald,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Edit Chef Profile',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: -0.4,
+                                  color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                                ),
+                              ),
+                              Text(
+                                'Personalize your pantry chef identity',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close_rounded, size: 20),
+                          onPressed: () => Navigator.of(bottomSheetContext).pop(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+
+                    // Live Interactive Avatar Preview
+                    Center(
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 68,
+                            height: 68,
+                            decoration: BoxDecoration(
+                              gradient: ColorPalette.primaryGradient,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: ColorPalette.freshEmerald.withValues(alpha: 0.35),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Center(
+                              child: Text(
+                                previewInitials,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: (isGuest ? ColorPalette.warningAmber : ColorPalette.freshEmerald).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              isGuest ? 'Guest Chef 👤' : 'Verified Chef 🌿',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w800,
+                                color: isGuest ? ColorPalette.warningAmber : ColorPalette.freshEmerald,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Chef Name Field
+                    Text(
+                      'Chef Display Name *',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: nameController,
+                      onChanged: (_) => setSheetState(() {}),
+                      decoration: InputDecoration(
+                        hintText: 'e.g. Chef Alex, Gourmet Kitchen',
+                        prefixIcon: const Icon(Icons.person_rounded, color: ColorPalette.freshEmerald, size: 20),
+                        filled: true,
+                        fillColor: isDark ? ColorPalette.darkSurfaceHighlight : ColorPalette.lightSurface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+
+                    // Email Field
+                    Text(
+                      'Contact Email *',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                        color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    TextField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: InputDecoration(
+                        hintText: 'e.g. chef@example.com',
+                        prefixIcon: const Icon(Icons.email_outlined, color: ColorPalette.freshEmerald, size: 20),
+                        filled: true,
+                        fillColor: isDark ? ColorPalette.darkSurfaceHighlight : ColorPalette.lightSurface,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Guest Mode Notice
+                    if (isGuest) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: ColorPalette.warningAmber.withValues(alpha: isDark ? 0.15 : 0.08),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: ColorPalette.warningAmber.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(Icons.info_outline_rounded, color: ColorPalette.warningAmber, size: 18),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Offline Guest Mode Active',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 12,
+                                      color: ColorPalette.warningAmber,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Profile edits are saved safely on this phone. Want cross-device cloud sync?',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isDark ? Colors.white70 : Colors.black87,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  InkWell(
+                                    onTap: () {
+                                      Navigator.of(bottomSheetContext).pop();
+                                      context.push(RoutePaths.login);
+                                    },
+                                    child: const Text(
+                                      'Sign In or Create Cloud Account →',
+                                      style: TextStyle(
+                                        fontSize: 11.5,
+                                        fontWeight: FontWeight.w800,
+                                        color: ColorPalette.freshEmerald,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 18),
+                    ],
+
+                    // Action Buttons Row
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(bottomSheetContext).pop(),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              side: BorderSide(
+                                color: isDark ? ColorPalette.darkBorder : ColorPalette.lightBorder,
+                              ),
+                            ),
+                            child: const Text('Cancel'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              final newName = nameController.text.trim();
+                              final newEmail = emailController.text.trim();
+
+                              if (newName.isEmpty) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please enter a chef display name')),
+                                );
+                                return;
+                              }
+
+                              final success = await ref
+                                  .read(authControllerProvider.notifier)
+                                  .updateProfile(name: newName, email: newEmail);
+
+                              if (bottomSheetContext.mounted) {
+                                Navigator.of(bottomSheetContext).pop();
+                              }
+
+                              if (context.mounted && success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text('Chef profile updated to "$newName"! 🎉'),
+                                    backgroundColor: ColorPalette.freshEmeraldDark,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                            icon: const Icon(Icons.check_rounded, color: Colors.white, size: 18),
+                            label: const Text(
+                              'Save Changes',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ColorPalette.freshEmerald,
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              elevation: 2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   void _showExportDialog(BuildContext context, WidgetRef ref) {
     final foodState = ref.read(foodListControllerProvider);
@@ -196,10 +555,33 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
+  Future<void> _handleLogout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await ConfirmationDialog.show(
+      context,
+      title: 'Sign Out?',
+      message: 'Are you sure you want to sign out of your account? Your local pantry records will remain safely saved.',
+      confirmLabel: 'Sign Out',
+      isDestructive: true,
+    );
+
+    if (confirmed == true && context.mounted) {
+      await ref.read(authControllerProvider.notifier).logout();
+      if (context.mounted) {
+        context.go(RoutePaths.login);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+
+    final user = ref.watch(currentUserProvider);
+    final isGuest = user?.isGuest ?? false;
+    final userName = user?.displayName ?? 'Chef Kitchen';
+    final userEmail = user?.email ?? '';
+    final userInitials = user?.initials ?? 'CK';
 
     final statsAsync = ref.watch(foodStatsControllerProvider);
     final stats = statsAsync.valueOrNull;
@@ -230,85 +612,122 @@ class ProfileScreen extends ConsumerWidget {
         physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
         children: [
-          // 1. Chef Profile Card
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: isDark ? ColorPalette.darkCard : ColorPalette.lightCard,
+          // 1. Chef Profile Card with Edit Action
+          Material(
+            color: isDark ? ColorPalette.darkCard : ColorPalette.lightCard,
+            shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(
+              side: BorderSide(
                 color: isDark ? ColorPalette.darkBorder : ColorPalette.lightBorder,
                 width: 1.0,
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
-            child: Row(
-              children: [
-                Container(
-                  width: 62,
-                  height: 62,
-                  decoration: const BoxDecoration(
-                    gradient: ColorPalette.primaryGradient,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Center(
-                    child: Icon(Icons.soup_kitchen_rounded, color: Colors.white, size: 30),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: () => _showEditProfileSheet(context, ref, user),
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 62,
+                      height: 62,
+                      decoration: const BoxDecoration(
+                        gradient: ColorPalette.primaryGradient,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: isGuest
+                            ? const Icon(Icons.person_outline_rounded, color: Colors.white, size: 30)
+                            : Text(
+                                userInitials,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Row(
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  userName,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Icon(
+                                isGuest ? Icons.shield_outlined : Icons.verified_rounded,
+                                size: 16,
+                                color: isGuest ? ColorPalette.warningAmber : ColorPalette.freshEmerald,
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
                           Text(
-                            'Chef Kitchen',
+                            userEmail.isNotEmpty ? userEmail : (isGuest ? 'Offline Guest Mode' : 'Pantry Master • Level 5'),
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w600,
+                              color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
                             ),
                           ),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.verified_rounded, size: 16, color: ColorPalette.freshEmerald),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                            decoration: BoxDecoration(
+                              color: (isGuest ? ColorPalette.warningAmber : ColorPalette.freshEmerald).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              isGuest ? 'Guest Chef 👤' : 'Verified Chef 🌿',
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w800,
+                                color: isGuest ? ColorPalette.warningAmber : ColorPalette.freshEmerald,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 3),
-                      Text(
-                        'Pantry Master • Level 5',
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2.5),
+                    ),
+                    const SizedBox(width: 8),
+                    // Edit Profile Icon Button
+                    Tooltip(
+                      message: 'Edit Chef Profile',
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          color: ColorPalette.freshEmerald.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          'Zero-Waste Hero 🌿',
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w800,
-                            color: ColorPalette.freshEmerald,
+                          color: ColorPalette.freshEmerald.withValues(alpha: isDark ? 0.2 : 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: ColorPalette.freshEmerald.withValues(alpha: 0.35),
                           ),
                         ),
+                        child: const Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: ColorPalette.freshEmerald,
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
 
@@ -416,6 +835,17 @@ class ProfileScreen extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 10),
+
+          _buildListTile(
+            context,
+            icon: Icons.edit_note_rounded,
+            title: 'Edit Chef Profile',
+            subtitle: 'Change chef display name and contact email',
+            iconColor: ColorPalette.freshEmerald,
+            isDark: isDark,
+            onTap: () => _showEditProfileSheet(context, ref, user),
+          ),
+          const SizedBox(height: 8),
 
           _buildListTile(
             context,
@@ -630,6 +1060,53 @@ class ProfileScreen extends ConsumerWidget {
             },
           ),
 
+          const SizedBox(height: 22),
+
+          // 8. Account & Security Section
+          Text(
+            'Account & Security',
+            style: TextStyle(
+              fontSize: 15.5,
+              fontWeight: FontWeight.w800,
+              color: isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          if (isGuest) ...[
+            _buildListTile(
+              context,
+              icon: Icons.login_rounded,
+              iconColor: ColorPalette.freshEmerald,
+              title: 'Sign In / Register',
+              subtitle: 'Link your pantry items to a cloud account',
+              isDark: isDark,
+              onTap: () => context.go(RoutePaths.login),
+            ),
+            const SizedBox(height: 10),
+            _buildListTile(
+              context,
+              icon: Icons.logout_rounded,
+              iconColor: Colors.red.shade600,
+              title: 'Exit Guest Session',
+              subtitle: 'Return to login screen',
+              isDark: isDark,
+              onTap: () => _handleLogout(context, ref),
+            ),
+          ] else ...[
+            _buildListTile(
+              context,
+              icon: Icons.logout_rounded,
+              iconColor: Colors.red.shade600,
+              title: 'Log Out',
+              subtitle: userEmail.isNotEmpty
+                  ? 'Signed in as $userEmail'
+                  : 'Sign out and return to the login screen',
+              isDark: isDark,
+              onTap: () => _handleLogout(context, ref),
+            ),
+          ],
+
           const SizedBox(height: 40),
         ],
       ),
@@ -668,6 +1145,8 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 10),
           Text(
             title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
@@ -677,6 +1156,8 @@ class ProfileScreen extends ConsumerWidget {
           const SizedBox(height: 2),
           Text(
             value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w900,
@@ -724,6 +1205,8 @@ class ProfileScreen extends ConsumerWidget {
         ),
         title: Text(
           title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 14.5,
             fontWeight: FontWeight.w800,
@@ -732,6 +1215,8 @@ class ProfileScreen extends ConsumerWidget {
         ),
         subtitle: Text(
           subtitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
           style: TextStyle(
             fontSize: 11.5,
             color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,

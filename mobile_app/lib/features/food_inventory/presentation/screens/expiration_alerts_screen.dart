@@ -467,51 +467,59 @@ class _ExpirationAlertsScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Top Row: Category, Brand, Expiry Status Pill
-          Row(
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 8,
+            runSpacing: 6,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: item.category.color.withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(item.category.icon, size: 12, color: item.category.color),
-                    const SizedBox(width: 4),
-                    Text(
-                      item.category.label,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                        color: item.category.color,
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: item.category.color.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(item.category.icon, size: 12, color: item.category.color),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.category.label,
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: item.category.color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (item.brand != null && item.brand!.isNotEmpty)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : Colors.black.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Text(
+                        item.brand!,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white70 : Colors.black87,
+                        ),
                       ),
                     ),
-                  ],
-                ),
+                ],
               ),
-              if (item.brand != null && item.brand!.isNotEmpty) ...[
-                const SizedBox(width: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.08)
-                        : Colors.black.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    item.brand!,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? Colors.white70 : Colors.black87,
-                    ),
-                  ),
-                ),
-              ],
-              const Spacer(),
               // Status Pill
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -577,50 +585,63 @@ class _ExpirationAlertsScreenState
                   : ColorPalette.lightSurface,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Row(
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
-                Icon(
-                  item.expiryDate != null
-                      ? Icons.event_rounded
-                      : Icons.all_inclusive_rounded,
-                  size: 14,
-                  color: isDark ? Colors.white70 : Colors.black54,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      item.expiryDate != null
+                          ? Icons.event_rounded
+                          : Icons.all_inclusive_rounded,
+                      size: 14,
+                      color: isDark ? Colors.white70 : Colors.black54,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      item.expiryDate != null
+                          ? 'Expiry: ${DateFormatter.formatDate(item.expiryDate)}'
+                          : 'No expiry date required',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 6),
-                Text(
-                  item.expiryDate != null
-                      ? 'Expiry: ${DateFormatter.formatDate(item.expiryDate)}'
-                      : 'No expiration date required',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white70 : Colors.black87,
-                  ),
-                ),
-                const Spacer(),
-                Icon(
-                  item.reminderEnabled
-                      ? Icons.notifications_active_rounded
-                      : Icons.notifications_off_outlined,
-                  size: 14,
-                  color: item.reminderEnabled
-                      ? const Color(0xFF8B5CF6)
-                      : Colors.grey,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  item.reminderEnabled
-                      ? (item.reminderDaysBefore.isNotEmpty
-                          ? '${item.reminderDaysBefore.map((d) => '${d}d').join(',')} before'
-                          : 'Custom reminder')
-                      : 'Reminder Off',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: item.reminderEnabled
-                        ? const Color(0xFF8B5CF6)
-                        : Colors.grey,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      item.reminderEnabled
+                          ? Icons.notifications_active_rounded
+                          : Icons.notifications_off_outlined,
+                      size: 14,
+                      color: item.reminderEnabled
+                          ? const Color(0xFF8B5CF6)
+                          : Colors.grey,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      item.reminderEnabled
+                          ? (item.reminderDaysBefore.isNotEmpty
+                              ? '${item.reminderDaysBefore.map((d) => '${d}d').join(',')} before'
+                              : 'Custom reminder')
+                          : 'Reminder Off',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: item.reminderEnabled
+                            ? const Color(0xFF8B5CF6)
+                            : Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

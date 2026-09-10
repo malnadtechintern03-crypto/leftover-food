@@ -803,6 +803,8 @@ class FoodLocalDataSourceImpl implements FoodLocalDataSource {
           'entity_id': entityId,
           'payload': jsonEncode(payload),
           'created_at': DateTime.now().toIso8601String(),
+          'status': 'pending',
+          'retry_count': 0,
         },
         conflictAlgorithm: ConflictAlgorithm.replace,
       );

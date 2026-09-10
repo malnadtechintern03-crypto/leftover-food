@@ -8,6 +8,8 @@ import '../../features/food_inventory/presentation/screens/add_edit_food_screen.
 import '../../features/food_inventory/presentation/screens/barcode_scanner_screen.dart';
 import '../../features/food_inventory/presentation/screens/expiration_alerts_screen.dart';
 import '../../features/food_inventory/presentation/screens/food_detail_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/recipes/presentation/screens/recipes_screen.dart';
 import '../../features/settings/presentation/screens/notifications_center_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
@@ -33,6 +35,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: RoutePaths.splash,
         name: RouteNames.splash,
         builder: (context, state) => const SplashScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.login,
+        name: RouteNames.login,
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: RoutePaths.register,
+        name: RouteNames.register,
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: RoutePaths.home,

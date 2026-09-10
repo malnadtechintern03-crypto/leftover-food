@@ -3,6 +3,7 @@ import '../../features/expiry_calendar/presentation/screens/expiry_calendar_scre
 import '../../features/food_inventory/presentation/screens/home_screen.dart';
 import '../../features/food_inventory/presentation/screens/pantry_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../theme/color_palette.dart';
 
 /// Main Navigation Scaffold featuring 4-tab Bottom Navigation with lazy tab loading
 class MainNavigationScaffold extends StatefulWidget {
@@ -64,40 +65,33 @@ class _MainNavigationScaffoldState extends State<MainNavigationScaffold> {
       ),
       bottomNavigationBar: SafeArea(
         top: false,
-        left: false,
-        right: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+          padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
           child: Container(
-            height: 64,
+            height: 66,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xFF0F3B2C), // Deep dark green
-                  Color(0xFF062319), // Dark forest shadow
-                ],
-              ),
-              borderRadius: BorderRadius.circular(36),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.22),
-                  blurRadius: 18,
-                  spreadRadius: 1,
-                  offset: const Offset(0, 6),
-                ),
-                BoxShadow(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.22), // Subtle emerald glow
-                  blurRadius: 16,
-                  spreadRadius: -1,
-                  offset: const Offset(0, 1),
-                ),
-              ],
+              color: isDark ? const Color(0xFF131F2E) : Colors.white,
+              borderRadius: BorderRadius.circular(28),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12),
+                color: isDark
+                    ? const Color(0xFF243B55)
+                    : const Color(0xFFE2E8F0),
                 width: 1.0,
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.07),
+                  blurRadius: 18,
+                  spreadRadius: 0,
+                  offset: const Offset(0, 4),
+                ),
+                if (!isDark)
+                  BoxShadow(
+                    color: ColorPalette.freshEmerald.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 1),
+                  ),
+              ],
             ),
             child: Row(
               children: [
@@ -106,24 +100,28 @@ class _MainNavigationScaffoldState extends State<MainNavigationScaffold> {
                   icon: _currentIndex == 0 ? Icons.home_rounded : Icons.home_outlined,
                   label: 'Home',
                   isSelected: _currentIndex == 0,
+                  isDark: isDark,
                 ),
                 _buildNavItem(
                   index: 1,
                   icon: _currentIndex == 1 ? Icons.shopping_basket_rounded : Icons.shopping_basket_outlined,
                   label: 'Groceries',
                   isSelected: _currentIndex == 1,
+                  isDark: isDark,
                 ),
                 _buildNavItem(
                   index: 2,
                   icon: Icons.calendar_month_rounded,
                   label: 'Calendar',
                   isSelected: _currentIndex == 2,
+                  isDark: isDark,
                 ),
                 _buildNavItem(
                   index: 3,
                   icon: _currentIndex == 3 ? Icons.person_rounded : Icons.person_outline_rounded,
                   label: 'Profile',
                   isSelected: _currentIndex == 3,
+                  isDark: isDark,
                 ),
               ],
             ),
@@ -138,61 +136,84 @@ class _MainNavigationScaffoldState extends State<MainNavigationScaffold> {
     required IconData icon,
     required String label,
     required bool isSelected,
+    required bool isDark,
   }) {
-    const activeFgColor = Color(0xFF064E3B);
-    const inactiveIconColor = Color(0xFFD1D5DB);
-    const inactiveTextColor = Color(0xFFE5E7EB);
-    const activePillColor = Color(0xFFA7F3D0); // Clean light green rounded rectangle
+    // Primary green accent
+    const activeColor = ColorPalette.freshEmerald;
+
+    // Unselected subtle dark gray/green
+    final inactiveIconColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+    final inactiveTextColor = isDark ? const Color(0xFF64748B) : const Color(0xFF94A3B8);
+    final activeTextColor = isDark ? ColorPalette.freshEmerald : const Color(0xFF047857);
+
+    // Soft light-green circular/rounded background for selected item
+    final selectedBgColor = isDark
+        ? const Color(0xFF10B981).withValues(alpha: 0.18)
+        : const Color(0xFFE8F5E9);
 
     return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => _switchTab(index),
-            borderRadius: BorderRadius.circular(20),
-            splashColor: activePillColor.withValues(alpha: 0.2),
-            highlightColor: Colors.transparent,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 260),
-              curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-              decoration: BoxDecoration(
-                color: isSelected ? activePillColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: isSelected
-                    ? [
-                        BoxShadow(
-                          color: activePillColor.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
+      child: Semantics(
+        label: label,
+        selected: isSelected,
+        button: true,
+        child: Tooltip(
+          message: label,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _switchTab(index),
+              borderRadius: BorderRadius.circular(22),
+              splashColor: activeColor.withValues(alpha: 0.12),
+              highlightColor: Colors.transparent,
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        curve: Curves.easeInOutCubic,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isSelected ? selectedBgColor : Colors.transparent,
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: isSelected
+                                ? (isDark
+                                    ? ColorPalette.freshEmerald.withValues(alpha: 0.3)
+                                    : const Color(0xFFA7F3D0))
+                                : Colors.transparent,
+                            width: 1.0,
+                          ),
                         ),
-                      ]
-                    : null,
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    icon,
-                    size: 21,
-                    color: isSelected ? activeFgColor : inactiveIconColor,
+                        child: AnimatedScale(
+                          scale: isSelected ? 1.08 : 1.0,
+                          duration: const Duration(milliseconds: 220),
+                          curve: Curves.easeInOutCubic,
+                          child: Icon(
+                            icon,
+                            size: 22,
+                            color: isSelected ? activeColor : inactiveIconColor,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9.5,
+                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w500,
+                          color: isSelected ? activeTextColor : inactiveTextColor,
+                          letterSpacing: -0.2,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 10.5,
-                      fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                      color: isSelected ? activeFgColor : inactiveTextColor,
-                      letterSpacing: -0.2,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),

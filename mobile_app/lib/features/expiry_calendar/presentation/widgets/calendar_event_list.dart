@@ -242,12 +242,16 @@ class CalendarEventList extends StatelessWidget {
                     // Category & Quantity
                     Row(
                       children: [
-                        Text(
-                          item.category.label,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: item.category.color,
+                        Flexible(
+                          child: Text(
+                            item.category.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: item.category.color,
+                            ),
                           ),
                         ),
                         Text(
@@ -256,14 +260,18 @@ class CalendarEventList extends StatelessWidget {
                             color: isDark ? Colors.white38 : Colors.black26,
                           ),
                         ),
-                        Text(
-                          '${item.remainingQuantity.toStringAsFixed(item.remainingQuantity.truncateToDouble() == item.remainingQuantity ? 0 : 1)} ${item.unit.displayName}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: isDark
-                                ? ColorPalette.darkTextSecondary
-                                : ColorPalette.lightTextSecondary,
+                        Flexible(
+                          child: Text(
+                            '${item.remainingQuantity.toStringAsFixed(item.remainingQuantity.truncateToDouble() == item.remainingQuantity ? 0 : 1)} ${item.unit.displayName}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: isDark
+                                  ? ColorPalette.darkTextSecondary
+                                  : ColorPalette.lightTextSecondary,
+                            ),
                           ),
                         ),
                       ],

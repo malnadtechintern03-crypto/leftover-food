@@ -87,10 +87,11 @@ class FoodSortSheet extends StatelessWidget {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             Center(
               child: Container(
                 width: 40,
@@ -158,6 +159,7 @@ class FoodSortSheet extends StatelessWidget {
               );
             }),
           ],
+        ),
         ),
       ),
     );

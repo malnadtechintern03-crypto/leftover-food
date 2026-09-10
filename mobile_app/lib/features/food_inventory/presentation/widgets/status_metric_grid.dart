@@ -285,17 +285,20 @@ class StatusMetricGrid extends StatelessWidget {
                 color: isPrimary ? Colors.white : color,
               ),
               const SizedBox(height: 5),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 9.5,
-                  fontWeight: FontWeight.w800,
-                  color: isPrimary
-                      ? Colors.white
-                      : (isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 9.5,
+                    fontWeight: FontWeight.w800,
+                    color: isPrimary
+                        ? Colors.white
+                        : (isDark ? ColorPalette.darkTextPrimary : ColorPalette.lightTextPrimary),
+                  ),
                 ),
               ),
             ],

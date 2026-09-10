@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path/path.dart' as path;
+import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/services/notification_service.dart';
 import '../../domain/entities/food_category.dart';
@@ -334,7 +337,21 @@ class FoodFormController extends StateNotifier<FoodFormState> {
         imageQuality: 85,
       );
       if (picked != null) {
-        state = state.copyWith(imagePath: picked.path, clearError: true);
+        String finalPath = picked.path;
+        try {
+          final appDir = await getApplicationDocumentsDirectory();
+          final imagesDir = Directory(path.join(appDir.path, 'product_images'));
+          if (!imagesDir.existsSync()) {
+            imagesDir.createSync(recursive: true);
+          }
+          final ext = path.extension(picked.path).isNotEmpty ? path.extension(picked.path) : '.jpg';
+          final targetFile = File(path.join(imagesDir.path, '${const Uuid().v4()}$ext'));
+          final savedFile = await File(picked.path).copy(targetFile.path);
+          finalPath = savedFile.path;
+        } catch (copyErr) {
+          debugPrint('Persistent image copy warning (using cached path): $copyErr');
+        }
+        state = state.copyWith(imagePath: finalPath, clearError: true);
       }
     } catch (e) {
       debugPrint('Image pick warning: $e');
@@ -473,19 +490,27 @@ class FoodFormController extends StateNotifier<FoodFormState> {
         await repo.saveReminders(itemId, remindersList);
 
         if (settings?.notificationsEnabled != false) {
-          await NotificationService.instance.scheduleProductReminders(
-            item: item,
-            reminderDaysBefore: state.reminderDaysBefore,
-            customReminderDate: state.customReminderDate,
-            reminderHour: settings?.reminderHour ?? 9,
-            reminderMinute: settings?.reminderMinute ?? 0,
-            soundEnabled: settings?.soundEnabled ?? true,
-            vibrationEnabled: settings?.vibrationEnabled ?? true,
-          );
+          try {
+            await NotificationService.instance.scheduleProductReminders(
+              item: item,
+              reminderDaysBefore: state.reminderDaysBefore,
+              customReminderDate: state.customReminderDate,
+              reminderHour: settings?.reminderHour ?? 9,
+              reminderMinute: settings?.reminderMinute ?? 0,
+              soundEnabled: settings?.soundEnabled ?? true,
+              vibrationEnabled: settings?.vibrationEnabled ?? true,
+            );
+          } catch (notifErr) {
+            debugPrint('Product reminder schedule non-fatal warning: $notifErr');
+          }
         }
       } else {
-        await repo.deleteRemindersForProduct(itemId);
-        await NotificationService.instance.cancelProductReminders(itemId);
+        try {
+          await repo.deleteRemindersForProduct(itemId);
+          await NotificationService.instance.cancelProductReminders(itemId);
+        } catch (notifErr) {
+          debugPrint('Cancel product reminders non-fatal warning: $notifErr');
+        }
       }
 
       _ref.read(foodListControllerProvider.notifier).loadItems();

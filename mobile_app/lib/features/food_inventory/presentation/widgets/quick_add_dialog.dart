@@ -431,6 +431,7 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
                   flex: 4,
                   child: DropdownButtonFormField<FoodUnit>(
                     initialValue: _unit,
+                    isExpanded: true,
                     decoration: InputDecoration(
                       labelText: 'Unit',
                       filled: true,
@@ -439,7 +440,15 @@ class _QuickAddDialogState extends ConsumerState<QuickAddDialog> {
                       contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
                     ),
                     items: FoodUnit.values.map((u) {
-                      return DropdownMenuItem(value: u, child: Text(u.label, style: const TextStyle(fontSize: 13)));
+                      return DropdownMenuItem(
+                        value: u,
+                        child: Text(
+                          u.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 13),
+                        ),
+                      );
                     }).toList(),
                     onChanged: (v) => setState(() => _unit = v ?? _unit),
                   ),

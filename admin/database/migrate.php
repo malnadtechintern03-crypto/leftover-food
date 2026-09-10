@@ -132,6 +132,52 @@ try {
         INDEX `idx_logs_date` (`created_at`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
+    // 5. Ensure users table exists with password column and seed demo user
+    $db->exec("CREATE TABLE IF NOT EXISTS `users` (
+        `id` VARCHAR(64) PRIMARY KEY,
+        `name` VARCHAR(150) NOT NULL,
+        `email` VARCHAR(150) NOT NULL UNIQUE,
+        `password` VARCHAR(255) NULL,
+        `role` VARCHAR(50) NOT NULL DEFAULT 'user',
+        `status` ENUM('active', 'inactive', 'banned') NOT NULL DEFAULT 'active',
+        `products_count` INT NOT NULL DEFAULT 0,
+        `scans_count` INT NOT NULL DEFAULT 0,
+        `last_login` DATETIME NULL,
+        `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        INDEX `idx_users_email` (`email`),
+        INDEX `idx_users_status` (`status`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    // Check if password column exists in users table
+    $userCols = [];
+    $stmt = $db->query("SHOW COLUMNS FROM users");
+    while ($row = $stmt->fetch()) {
+        $userCols[] = strtolower($row['Field']);
+    }
+    if (!in_array('password', $userCols, true)) {
+        try {
+            $db->exec("ALTER TABLE `users` ADD COLUMN `password` VARCHAR(255) NULL AFTER `email`");
+            $messages[] = "Added column `users`.`password`";
+        } catch (PDOException $e) {
+            // Ignore if already added
+        }
+    }
+
+    // Seed or update Demo User (user@homepantry.com / user123)
+    $demoPasswordHash = password_hash('user123', PASSWORD_BCRYPT);
+    $checkDemo = $db->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+    $checkDemo->execute(['user@homepantry.com']);
+    if (!$checkDemo->fetch()) {
+        $insertDemo = $db->prepare("
+            INSERT INTO users (id, name, email, password, role, status)
+            VALUES (?, ?, ?, ?, 'user', 'active')
+        ");
+        $insertDemo->execute(['user_demo_chef', 'Demo Chef', 'user@homepantry.com', $demoPasswordHash]);
+        $messages[] = "Created demo user account (user@homepantry.com / user123)";
+    }
+
+
     // Output result
     if (php_sapi_name() === 'cli') {
         echo "Migration completed successfully!\n";

@@ -573,12 +573,17 @@ class _BarcodeScannerScreenState extends ConsumerState<BarcodeScannerScreen>
                         children: [
                           Icon(Icons.center_focus_strong_rounded, color: ColorPalette.freshEmerald, size: 16),
                           SizedBox(width: 8),
-                          Text(
-                            'Place the grocery barcode inside the box',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.w600,
+                          Flexible(
+                            child: Text(
+                              'Place the grocery barcode inside the box',
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],

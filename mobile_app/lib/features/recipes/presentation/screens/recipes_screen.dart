@@ -871,7 +871,11 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
+                  Wrap(
+                    alignment: WrapAlignment.spaceBetween,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: 8,
+                    runSpacing: 4,
                     children: [
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
@@ -888,8 +892,8 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                           ),
                         ),
                       ),
-                      const Spacer(),
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(Icons.timer_outlined, size: 14, color: isDark ? Colors.white54 : Colors.black45),
                           const SizedBox(width: 3),
@@ -1025,12 +1029,16 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                                 children: [
                                   Icon(Icons.play_arrow_rounded, color: Colors.white, size: 18),
                                   SizedBox(width: 6),
-                                  Text(
-                                    'Watch on YouTube',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w800,
+                                  Flexible(
+                                    child: Text(
+                                      'Watch on YouTube',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w800,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -1205,13 +1213,17 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                                 children: [
                                   Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 24),
                                   SizedBox(width: 10),
-                                  Text(
-                                    'Watch Video Tutorial on YouTube',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w900,
-                                      letterSpacing: -0.2,
+                                  Flexible(
+                                    child: Text(
+                                      'Watch Video Tutorial on YouTube',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w900,
+                                        letterSpacing: -0.2,
+                                      ),
                                     ),
                                   ),
                                 ],

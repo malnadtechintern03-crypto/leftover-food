@@ -11,6 +11,8 @@ import '../../../../core/utils/app_review_helper.dart';
 import '../../../food_inventory/presentation/providers/food_inventory_providers.dart';
 import '../../../food_inventory/presentation/providers/food_list_controller.dart';
 import '../../../food_inventory/presentation/providers/food_stats_controller.dart';
+import '../../../../core/widgets/confirmation_dialog.dart';
+import '../../../auth/presentation/providers/auth_controller.dart';
 import '../providers/settings_controller.dart';
 import '../widgets/food_tips_sheet.dart';
 
@@ -23,6 +25,7 @@ class SettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final settingsAsync = ref.watch(settingsControllerProvider);
+    final user = ref.watch(currentUserProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -283,12 +286,17 @@ class SettingsScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'Default Reminder Period',
-                                style: theme.textTheme.titleSmall?.copyWith(
-                                  fontWeight: FontWeight.w600,
+                              Expanded(
+                                child: Text(
+                                  'Default Reminder Period',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: theme.textTheme.titleSmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
+                              const SizedBox(width: 8),
                               Text(
                                 '${settings.defaultReminderDays} days before',
                                 style: theme.textTheme.labelMedium?.copyWith(
@@ -527,6 +535,115 @@ class SettingsScreen extends ConsumerWidget {
 
               const SizedBox(height: 24),
 
+              // Account & Security Section
+              _buildSectionHeader(
+                context,
+                'Account & Security',
+                Icons.account_circle_outlined,
+              ),
+              const SizedBox(height: 12),
+              _buildCard(
+                context,
+                child: Column(
+                  children: [
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          gradient: ColorPalette.primaryGradient,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            user?.initials ?? 'CK',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        user?.displayName ?? 'Chef Kitchen',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      subtitle: Text(
+                        user?.email.isNotEmpty == true
+                            ? user!.email
+                            : (user?.isGuest == true ? 'Offline Guest Mode' : 'Signed In'),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
+                        ),
+                      ),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: (user?.isGuest == true ? ColorPalette.warningAmber : ColorPalette.freshEmerald).withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          user?.isGuest == true ? 'Guest' : 'Active',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            color: user?.isGuest == true ? ColorPalette.warningAmber : ColorPalette.freshEmerald,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Icon(Icons.logout_rounded, color: Colors.red.shade700, size: 20),
+                      ),
+                      title: Text(
+                        user?.isGuest == true ? 'Exit Guest Session' : 'Sign Out',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.red.shade700,
+                        ),
+                      ),
+                      subtitle: Text(
+                        user?.isGuest == true ? 'Return to sign in screen' : 'Sign out of your account on this device',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
+                        ),
+                      ),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 14),
+                      onTap: () async {
+                        final confirmed = await ConfirmationDialog.show(
+                          context,
+                          title: 'Sign Out?',
+                          message: 'Are you sure you want to sign out? Your local pantry records will remain safe.',
+                          confirmLabel: 'Sign Out',
+                          isDestructive: true,
+                        );
+
+                        if (confirmed == true && context.mounted) {
+                          await ref.read(authControllerProvider.notifier).logout();
+                          if (context.mounted) {
+                            context.go(RoutePaths.login);
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
               // App Info
               _buildSectionHeader(context, 'About', Icons.info_outline_rounded),
               const SizedBox(height: 12),
@@ -635,11 +752,15 @@ class SettingsScreen extends ConsumerWidget {
       children: [
         Icon(icon, size: 18, color: ColorPalette.primaryGreen),
         const SizedBox(width: 8),
-        Text(
-          title,
-          style: theme.textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.2,
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.2,
+            ),
           ),
         ),
       ],

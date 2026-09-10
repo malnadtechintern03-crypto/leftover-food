@@ -6,6 +6,8 @@ import 'package:foodsave/features/food_inventory/data/datasources/food_local_dat
 import 'package:foodsave/features/food_inventory/domain/entities/food_category.dart';
 import 'package:foodsave/features/food_inventory/domain/entities/food_filter.dart';
 import 'package:foodsave/features/food_inventory/domain/entities/storage_location.dart';
+import 'package:foodsave/features/food_inventory/data/models/food_item_model.dart';
+import 'package:foodsave/features/food_inventory/domain/entities/food_unit.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {
@@ -106,5 +108,63 @@ void main() {
       filter: const FoodFilter(category: FoodCategory.medicines),
     );
     expect(medicineItems.any((i) => i.id == 'prod-3'), isTrue);
+  });
+
+  test('Local standalone product creation persists safely in SQLite and queues in sync_queue', () async {
+    final dbHelper = DatabaseHelper.instance;
+    final db = await dbHelper.database;
+    expect(db, isNotNull);
+
+    final dataSource = FoodLocalDataSourceImpl(dbHelper);
+    final now = DateTime.now();
+    const testItemId = 'standalone_test_item_123';
+
+    final testProduct = FoodItemModel(
+      id: testItemId,
+      name: 'Fresh Organic Milk',
+      brand: 'Farm Fresh',
+      category: FoodCategory.dairy,
+      purchaseDate: now,
+      expiryDate: now.add(const Duration(days: 10)),
+      remainingQuantity: 5.0,
+      unit: FoodUnit.pieces,
+      storageLocation: StorageLocation.fridge,
+      createdAt: now,
+      updatedAt: now,
+    );
+
+    // 1. Insert product locally
+    await dataSource.insertFoodItem(testProduct);
+
+    // 2. Verify product is persisted in SQLite
+    final fetched = await dataSource.getFoodItemById(testItemId);
+    expect(fetched, isNotNull);
+    expect(fetched!.name, 'Fresh Organic Milk');
+    expect(fetched.category, FoodCategory.dairy);
+
+    // 3. Verify sync_queue contains valid row with status and string id
+    final queueRows = await db!.query(
+      AppConstants.syncQueueTable,
+      where: 'entity_id = ?',
+      whereArgs: [testItemId],
+    );
+    expect(queueRows.isNotEmpty, isTrue);
+    final row = queueRows.first;
+    expect(row['status'], 'pending');
+    expect(row['retry_count'], 0);
+    expect(row['entity_type'], 'product');
+    expect(row['action'], 'insert');
+
+    // 4. Verify syncPendingQueue executes cleanly without crashes
+    final pushResult = await ProductSyncService.instance.syncPendingQueue();
+    expect(pushResult, isNotNull);
+
+    // 5. Verify pullFromAdmin in offline mode does not delete local product
+    final pullCount = await ProductSyncService.instance.pullFromAdmin();
+    expect(pullCount, 0);
+
+    final recheck = await dataSource.getFoodItemById(testItemId);
+    expect(recheck, isNotNull);
+    expect(recheck!.id, testItemId);
   });
 }

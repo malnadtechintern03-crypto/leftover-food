@@ -40,13 +40,19 @@ class ProductSyncService {
 
   /// Process all pending records in SQLite sync_queue table (Push to Admin)
   Future<ProductSyncResult> syncPendingQueue({String? customBaseUrl}) async {
-    String effectiveBaseUrl = customBaseUrl ?? _baseUrl;
-    if (customBaseUrl == null) {
+    String? effectiveBaseUrl = customBaseUrl;
+    if (effectiveBaseUrl == null) {
       final discoveredAdmin = await AdminSyncService.getWorkingBaseUrl();
       if (discoveredAdmin != null && discoveredAdmin.isNotEmpty) {
         effectiveBaseUrl = '$discoveredAdmin/api';
       }
     }
+
+    if (effectiveBaseUrl == null || effectiveBaseUrl.isEmpty) {
+      // Disconnected or standalone mode - skip remote push without network delays
+      return const ProductSyncResult(syncedCount: 0, failedCount: 0);
+    }
+
     final db = await DatabaseHelper.instance.database;
     if (db == null) {
       return const ProductSyncResult(syncedCount: 0, failedCount: 0);
@@ -65,11 +71,13 @@ class ProductSyncService {
       );
 
       for (final row in pendingRows) {
-        final id = row['id'] as int;
+        final id = row['id']?.toString() ?? '';
         final action = row['action'] as String;
         final entityType = row['entity_type'] as String;
         final payloadRaw = row['payload'] as String?;
         final retryCount = (row['retry_count'] as int?) ?? 0;
+
+        if (id.isEmpty) continue;
 
         if (payloadRaw == null && action != 'delete') {
           await db.delete(AppConstants.syncQueueTable, where: 'id = ?', whereArgs: [id]);
@@ -147,12 +155,17 @@ class ProductSyncService {
 
   /// Pulls products from Admin Panel into local SQLite database
   Future<int> pullFromAdmin({String? customBaseUrl}) async {
-    String effectiveBaseUrl = customBaseUrl ?? _baseUrl;
-    if (customBaseUrl == null) {
+    String? effectiveBaseUrl = customBaseUrl;
+    if (effectiveBaseUrl == null) {
       final discoveredAdmin = await AdminSyncService.getWorkingBaseUrl();
       if (discoveredAdmin != null && discoveredAdmin.isNotEmpty) {
         effectiveBaseUrl = '$discoveredAdmin/api';
       }
+    }
+
+    if (effectiveBaseUrl == null || effectiveBaseUrl.isEmpty) {
+      // Standalone mode - no remote server configured or accessible
+      return 0;
     }
 
     final db = await DatabaseHelper.instance.database;
@@ -167,13 +180,11 @@ class ProductSyncService {
         final dynamic decoded = jsonDecode(res.body);
         if (decoded is Map<String, dynamic> && decoded['data'] is List) {
           final items = decoded['data'] as List;
-          final remoteProductIds = <String>{};
 
           for (final raw in items) {
             if (raw is Map<String, dynamic>) {
               final id = raw['id']?.toString() ?? '';
               if (id.isEmpty) continue;
-              remoteProductIds.add(id);
 
               final name = raw['name']?.toString() ?? 'Unnamed Product';
               final brand = raw['brand']?.toString();
@@ -218,28 +229,6 @@ class ProductSyncService {
               ]);
 
               pulled++;
-            }
-          }
-
-          // Clean up local items that were deleted on the remote Admin server
-          // (preserving pending locally created items waiting in sync_queue)
-          final existingRows = await db.query(AppConstants.foodTable, columns: ['id']);
-          final pendingRows = await db.query(
-            AppConstants.syncQueueTable,
-            columns: ['entity_id'],
-            where: "status = 'pending'",
-          );
-          final pendingIds = pendingRows
-              .map((r) => r['entity_id']?.toString())
-              .whereType<String>()
-              .toSet();
-
-          for (final row in existingRows) {
-            final localId = row['id']?.toString();
-            if (localId != null &&
-                !remoteProductIds.contains(localId) &&
-                !pendingIds.contains(localId)) {
-              await db.delete(AppConstants.foodTable, where: 'id = ?', whereArgs: [localId]);
             }
           }
         }

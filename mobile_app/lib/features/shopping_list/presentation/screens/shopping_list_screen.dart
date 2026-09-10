@@ -371,9 +371,11 @@ class ShoppingListScreen extends ConsumerWidget {
                           ),
                           title: Row(
                             children: [
-                              Expanded(
+                                Expanded(
                                 child: Text(
                                   item.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w700,
@@ -384,7 +386,8 @@ class ShoppingListScreen extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              if (item.priority == ShoppingPriority.high)
+                              if (item.priority == ShoppingPriority.high) ...[
+                                const SizedBox(width: 4),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                   decoration: BoxDecoration(
@@ -393,10 +396,13 @@ class ShoppingListScreen extends ConsumerWidget {
                                   ),
                                   child: const Text('High 🔥', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: ColorPalette.sunsetCoral)),
                                 ),
+                              ],
                             ],
                           ),
                           subtitle: Text(
                             '${item.quantity.toStringAsFixed(item.quantity.truncateToDouble() == item.quantity ? 0 : 1)} ${item.unit.label} • ${item.category.label}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontSize: 12,
                               color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
@@ -406,21 +412,26 @@ class ShoppingListScreen extends ConsumerWidget {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               if (item.isPurchased)
-                                TextButton.icon(
-                                  icon: const Icon(Icons.add_circle_outline_rounded, size: 16),
-                                  label: const Text('Add to Pantry', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-                                  style: TextButton.styleFrom(
-                                    foregroundColor: ColorPalette.freshEmerald,
-                                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                                  ),
+                                IconButton(
+                                  icon: const Icon(Icons.add_circle_outline_rounded, size: 20, color: ColorPalette.freshEmerald),
+                                  tooltip: 'Add to Pantry',
+                                  visualDensity: VisualDensity.compact,
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                                   onPressed: () => _showAddToPantryDialog(context, ref, item),
                                 ),
                               IconButton(
                                 icon: const Icon(Icons.edit_outlined, size: 18),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                                 onPressed: () => AddEditShoppingItemDialog.show(context, initialItem: item),
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete_outline_rounded, size: 18, color: ColorPalette.expiredRed),
+                                visualDensity: VisualDensity.compact,
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                                 onPressed: () {
                                   ref.read(shoppingListControllerProvider.notifier).deleteItem(item.id);
                                 },

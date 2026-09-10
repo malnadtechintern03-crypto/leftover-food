@@ -43,16 +43,19 @@ class AdminSyncService {
 
   static String? _resolvedBaseUrl;
   static String? _customBaseUrl;
+  static DateTime? _lastNegativeCheck;
 
   /// Sets a manual custom base URL override
   static void setCustomBaseUrl(String? url) {
     _customBaseUrl = url?.trim().replaceAll(RegExp(r'/+$'), '');
     _resolvedBaseUrl = _customBaseUrl;
+    _lastNegativeCheck = null;
   }
 
   /// Clears the resolved base URL cache
   static void clearResolvedBaseUrl() {
     _resolvedBaseUrl = null;
+    _lastNegativeCheck = null;
   }
 
   /// Discovers the active working REST API endpoint
@@ -65,37 +68,56 @@ class AdminSyncService {
       return _customBaseUrl;
     }
 
-    final client = HttpClient();
-    client.connectionTimeout = const Duration(seconds: 3);
+    // Negative cache: if no server was reachable recently, skip re-probing to avoid thread/socket delays
+    if (_lastNegativeCheck != null &&
+        DateTime.now().difference(_lastNegativeCheck!).inSeconds < 180) {
+      return null;
+    }
 
-    for (int i = 0; i < _candidateBaseUrls.length; i++) {
-      final candidate = _candidateBaseUrls[i];
-      final timeoutDuration = i == 0 ? const Duration(milliseconds: 2500) : const Duration(milliseconds: 1500);
+    final client = HttpClient();
+    client.connectionTimeout = const Duration(milliseconds: 1200);
+
+    // Fast probe: check candidate URLs concurrently with short timeout
+    Future<String?> probeCandidate(String candidate) async {
       try {
         final statusUri = Uri.parse('$candidate/api/status.php');
-        final request = await client.getUrl(statusUri).timeout(timeoutDuration);
-        final response = await request.close().timeout(timeoutDuration);
+        final request = await client.getUrl(statusUri).timeout(const Duration(milliseconds: 1200));
+        final response = await request.close().timeout(const Duration(milliseconds: 1200));
         if (response.statusCode == 200) {
-          _resolvedBaseUrl = candidate;
-          client.close();
-          debugPrint('AdminSyncService: Connected to active endpoint $_resolvedBaseUrl');
           return candidate;
         }
-      } catch (_) {
-        try {
-          final uri = Uri.parse('$candidate/api/categories.php');
-          final request = await client.getUrl(uri).timeout(timeoutDuration);
-          final response = await request.close().timeout(timeoutDuration);
-          if (response.statusCode == 200) {
-            _resolvedBaseUrl = candidate;
-            client.close();
-            debugPrint('AdminSyncService: Connected to active endpoint $_resolvedBaseUrl');
-            return candidate;
-          }
-        } catch (_) {}
-      }
+      } catch (_) {}
+      return null;
     }
+
+    try {
+      // Test top candidates in parallel batches
+      final batch1 = _candidateBaseUrls.take(6).map(probeCandidate).toList();
+      final results1 = await Future.wait(batch1);
+      for (final res in results1) {
+        if (res != null) {
+          _resolvedBaseUrl = res;
+          client.close();
+          debugPrint('AdminSyncService: Connected to active endpoint $_resolvedBaseUrl');
+          return res;
+        }
+      }
+
+      // Test remaining candidates
+      final batch2 = _candidateBaseUrls.skip(6).take(8).map(probeCandidate).toList();
+      final results2 = await Future.wait(batch2);
+      for (final res in results2) {
+        if (res != null) {
+          _resolvedBaseUrl = res;
+          client.close();
+          debugPrint('AdminSyncService: Connected to active endpoint $_resolvedBaseUrl');
+          return res;
+        }
+      }
+    } catch (_) {}
+
     client.close();
+    _lastNegativeCheck = DateTime.now();
     return null;
   }
 

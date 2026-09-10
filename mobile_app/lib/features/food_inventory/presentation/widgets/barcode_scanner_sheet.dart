@@ -294,9 +294,14 @@ class _BarcodeScannerSheetState extends State<BarcodeScannerSheet> {
                         color: ColorPalette.freshEmerald.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Text(
-                        'Align barcode within frame or tap a match below',
-                        style: TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w600),
+                      child: const FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'Align barcode within frame or tap a match below',
+                          textAlign: TextAlign.center,
+                          maxLines: 2,
+                          style: TextStyle(color: Colors.white, fontSize: 11.5, fontWeight: FontWeight.w600),
+                        ),
                       ),
                     ),
                   ],

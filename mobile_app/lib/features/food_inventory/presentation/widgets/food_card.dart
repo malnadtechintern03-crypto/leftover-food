@@ -143,12 +143,16 @@ class FoodCard extends ConsumerWidget {
                                 children: [
                                   Icon(item.category.icon, size: 10, color: item.category.color),
                                   const SizedBox(width: 3.5),
-                                  Text(
-                                    item.category.label,
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: item.category.color,
+                                  Flexible(
+                                    child: Text(
+                                      item.category.label,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: item.category.color,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -167,12 +171,16 @@ class FoodCard extends ConsumerWidget {
                                 children: [
                                   Icon(item.storageLocation.icon, size: 10, color: item.storageLocation.color),
                                   const SizedBox(width: 3),
-                                  Text(
-                                    item.storageLocation.label,
-                                    style: TextStyle(
-                                      fontSize: 10.5,
-                                      fontWeight: FontWeight.w700,
-                                      color: item.storageLocation.color,
+                                  Flexible(
+                                    child: Text(
+                                      item.storageLocation.label,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: item.storageLocation.color,
+                                      ),
                                     ),
                                   ),
                                 ],
@@ -338,6 +346,8 @@ class FoodCard extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           'Low stock (Min: ${item.minimumStock?.toStringAsFixed(0)} ${item.unit.abbreviation})',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: ColorPalette.warningAmber),
                         ),
                       ),
@@ -384,11 +394,15 @@ class FoodCard extends ConsumerWidget {
                               color: isDark ? Colors.white38 : Colors.black38,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              'Added: $addedDateStr',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                color: isDark ? ColorPalette.darkTextTertiary : ColorPalette.lightTextTertiary,
+                            Expanded(
+                              child: Text(
+                                'Added: $addedDateStr',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  color: isDark ? ColorPalette.darkTextTertiary : ColorPalette.lightTextTertiary,
+                                ),
                               ),
                             ),
                           ],
@@ -402,14 +416,18 @@ class FoodCard extends ConsumerWidget {
                               color: isDark ? Colors.white38 : Colors.black38,
                             ),
                             const SizedBox(width: 4),
-                            Text(
-                              item.expiryDate != null ? 'Expires: $expiryDateStr' : 'No Expiration Date',
-                              style: TextStyle(
-                                fontSize: 10.5,
-                                fontWeight: FontWeight.w600,
-                                color: item.expiryDate != null
-                                    ? (isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary)
-                                    : Colors.grey,
+                            Expanded(
+                              child: Text(
+                                item.expiryDate != null ? 'Expires: $expiryDateStr' : 'No Expiration Date',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 10.5,
+                                  fontWeight: FontWeight.w600,
+                                  color: item.expiryDate != null
+                                      ? (isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary)
+                                      : Colors.grey,
+                                ),
                               ),
                             ),
                           ],
@@ -417,6 +435,7 @@ class FoodCard extends ConsumerWidget {
                       ],
                     ),
                   ),
+                  const SizedBox(width: 8),
 
                   // Remaining Days Countdown & Status Pill
                   _buildExpiryPill(days, status, isDark),
@@ -465,6 +484,8 @@ class FoodCard extends ConsumerWidget {
           ),
           child: Text(
             statusLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 10.5,
               fontWeight: FontWeight.w800,
@@ -476,6 +497,8 @@ class FoodCard extends ConsumerWidget {
           const SizedBox(height: 3),
           Text(
             countdownStr,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.w700,

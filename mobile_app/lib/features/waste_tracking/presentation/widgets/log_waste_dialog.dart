@@ -81,11 +81,17 @@ class _LogWasteDialogState extends ConsumerState<LogWasteDialog> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AlertDialog(
-      title: Row(
+      title: const Row(
         children: [
-          const Icon(Icons.delete_sweep_rounded, color: ColorPalette.expiredRed),
-          const SizedBox(width: 8),
-          const Text('Log Discarded Grocery'),
+          Icon(Icons.delete_sweep_rounded, color: ColorPalette.expiredRed),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Log Discarded Grocery',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
         ],
       ),
       content: SingleChildScrollView(
@@ -95,6 +101,8 @@ class _LogWasteDialogState extends ConsumerState<LogWasteDialog> {
           children: [
             Text(
               'Item: ${widget.item.name}',
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
             ),
             const SizedBox(height: 4),

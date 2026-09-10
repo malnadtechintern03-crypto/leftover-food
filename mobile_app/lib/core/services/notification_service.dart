@@ -210,8 +210,9 @@ class NotificationService {
       return;
     }
 
+    final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
+
     try {
-      final tzScheduled = tz.TZDateTime.from(scheduledDate, tz.local);
       await _notificationsPlugin.zonedSchedule(
         id,
         title,
@@ -224,10 +225,22 @@ class NotificationService {
         payload: payload,
       );
     } catch (e) {
-      debugPrint('zonedSchedule warning, falling back: $e');
+      debugPrint('zonedSchedule exactAllowWhileIdle note: $e, falling back to inexact');
       try {
-        await _notificationsPlugin.show(id, title, body, details, payload: payload);
-      } catch (_) {}
+        await _notificationsPlugin.zonedSchedule(
+          id,
+          title,
+          body,
+          tzScheduled,
+          details,
+          androidScheduleMode: AndroidScheduleMode.inexact,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: payload,
+        );
+      } catch (e2) {
+        debugPrint('zonedSchedule inexact fallback non-fatal note: $e2');
+      }
     }
   }
 

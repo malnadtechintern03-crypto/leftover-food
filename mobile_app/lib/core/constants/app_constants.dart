@@ -8,7 +8,7 @@ class AppConstants {
 
   // Database
   static const String databaseName = 'foodsave.db';
-  static const int databaseVersion = 4;
+  static const int databaseVersion = 5;
   static const String foodTable = 'food_items';
   static const String shoppingTable = 'shopping_items';
   static const String wasteTable = 'waste_records';
@@ -36,6 +36,15 @@ class AppConstants {
   static const String keyVibrationEnabled = 'settings_vibration_enabled';
   static const String keyDailySummaryHour = 'settings_daily_summary_hour';
   static const String keyDailySummaryMinute = 'settings_daily_summary_minute';
+
+  // Auth & Session Keys
+  static const String keyAuthUserId = 'auth_user_id';
+  static const String keyAuthUserName = 'auth_user_name';
+  static const String keyAuthUserEmail = 'auth_user_email';
+  static const String keyAuthToken = 'auth_session_token';
+  static const String keyAuthIsGuest = 'auth_is_guest';
+  static const String keyAuthRole = 'auth_user_role';
+  static const String keyAuthCreatedAt = 'auth_user_created_at';
 
   // Defaults
   static const int defaultExpiryWarningDays = 7;

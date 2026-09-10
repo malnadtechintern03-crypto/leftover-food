@@ -107,25 +107,30 @@ class _ConsumeQuantityDialogState extends State<ConsumeQuantityDialog> {
                       : null,
                   icon: const Icon(Icons.remove),
                 ),
-                Column(
-                  children: [
-                    Text(
-                      _consumeQuantity.toStringAsFixed(
-                          _consumeQuantity.truncateToDouble() == _consumeQuantity ? 0 : 1),
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: ColorPalette.primaryGreen,
+                Expanded(
+                  child: Column(
+                    children: [
+                      Text(
+                        _consumeQuantity.toStringAsFixed(
+                            _consumeQuantity.truncateToDouble() == _consumeQuantity ? 0 : 1),
+                        style: theme.textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: ColorPalette.primaryGreen,
+                        ),
                       ),
-                    ),
-                    Text(
-                      '${item.unit.displayName} (out of ${item.remainingQuantity.toStringAsFixed(item.remainingQuantity.truncateToDouble() == item.remainingQuantity ? 0 : 1)})',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: isDark
-                            ? ColorPalette.darkTextSecondary
-                            : ColorPalette.lightTextSecondary,
+                      Text(
+                        '${item.unit.displayName} (out of ${item.remainingQuantity.toStringAsFixed(item.remainingQuantity.truncateToDouble() == item.remainingQuantity ? 0 : 1)})',
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: isDark
+                              ? ColorPalette.darkTextSecondary
+                              : ColorPalette.lightTextSecondary,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
                 IconButton.filledTonal(
                   onPressed: _consumeQuantity < item.remainingQuantity

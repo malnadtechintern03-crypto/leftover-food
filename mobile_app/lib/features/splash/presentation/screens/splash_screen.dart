@@ -8,6 +8,7 @@ import '../../../../app/theme/color_palette.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/services/app_initializer.dart';
 import '../../../../core/services/product_sync_service.dart';
+import '../../../auth/presentation/providers/auth_controller.dart';
 import '../../../food_inventory/presentation/providers/food_list_controller.dart';
 import '../../../food_inventory/presentation/providers/food_stats_controller.dart';
 import '../../../settings/presentation/providers/settings_controller.dart';
@@ -240,6 +241,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       await AppInitializer.instance.initialize();
       if (mounted) {
         await ref.read(settingsControllerProvider.notifier).loadSettings();
+        await ref.read(authControllerProvider.notifier).checkAuthStatus();
       }
       // Non-blocking auto-sync on launch: pulls fresh items from admin panel and notifies state
       unawaited(
@@ -275,12 +277,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     }
 
     if (mounted) {
+      final user = ref.read(currentUserProvider);
+      final destination = (user != null) ? RoutePaths.home : RoutePaths.login;
       try {
-        context.go(RoutePaths.home);
+        context.go(destination);
       } catch (e) {
         debugPrint('SplashScreen navigation fallback: $e');
         try {
-          Navigator.of(context).pushReplacementNamed(RoutePaths.home);
+          Navigator.of(context).pushReplacementNamed(destination);
         } catch (_) {}
       }
     }

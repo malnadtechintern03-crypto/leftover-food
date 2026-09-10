@@ -31,7 +31,7 @@ class PantryHeroCard extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(24),
           child: Container(
-            height: 170,
+            constraints: const BoxConstraints(minHeight: 165),
             width: double.infinity,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
@@ -110,6 +110,7 @@ class PantryHeroCard extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               '$total',

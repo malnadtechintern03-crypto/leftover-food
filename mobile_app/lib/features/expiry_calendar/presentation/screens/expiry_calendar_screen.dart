@@ -357,6 +357,8 @@ class ExpiryCalendarScreen extends ConsumerWidget {
               children: [
                 Text(
                   '${items.length} grocery ${items.length == 1 ? 'item' : 'items'} expiring',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
@@ -367,6 +369,8 @@ class ExpiryCalendarScreen extends ConsumerWidget {
                   items.isEmpty
                       ? 'No items tracked for expiration on this date'
                       : 'Review items below and consume before expiry',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark ? ColorPalette.darkTextSecondary : ColorPalette.lightTextSecondary,
